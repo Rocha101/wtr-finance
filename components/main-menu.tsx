@@ -12,6 +12,7 @@ import {
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
+import { Button } from "./ui/button";
 
 const MainMenuComponent = () => {
   const router = useRouter();
@@ -33,10 +34,6 @@ const MainMenuComponent = () => {
         },
       ],
     },
-    {
-      label: "Sair",
-      logout: true,
-    },
   ];
 
   return (
@@ -56,13 +53,16 @@ const MainMenuComponent = () => {
                 </MenubarContent>
               </>
             ) : (
-              <MenubarTrigger onClick={item?.action} asChild={item.logout}>
-                {item.logout ? <LogoutLink>Sign out</LogoutLink> : item.label}
+              <MenubarTrigger onClick={item?.action}>
+                {item.label}
               </MenubarTrigger>
             )}
           </MenubarMenu>
         );
       })}
+      <Button asChild variant="link" size="sm" className="absolute right-1">
+        <LogoutLink>Sair</LogoutLink>
+      </Button>
     </Menubar>
   );
 };

@@ -1,3 +1,5 @@
+"use client";
+
 import MainMenuComponent from "@/components/main-menu";
 import { ReactNode } from "react";
 import { Toaster } from "sonner";
@@ -10,8 +12,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   return (
     <div>
       <MainMenuComponent />
-      {children}
-      <Toaster />
+      <div className="mt-3">{children}</div>
     </div>
   );
 };

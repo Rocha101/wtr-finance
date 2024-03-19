@@ -5,34 +5,40 @@ import {
   MenubarContent,
   MenubarItem,
   MenubarMenu,
-  MenubarSeparator,
-  MenubarShortcut,
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { Button } from "./ui/button";
+import Link from "next/link";
+
+type ItemsT = {
+  label: string;
+  action?: () => void;
+  children?: {
+    label: string;
+    action: () => void;
+  }[];
+}[];
 
 const MainMenuComponent = () => {
   const router = useRouter();
-  const items = [
+  const items: ItemsT = [
     {
       label: "Home",
       action: () => router.push("/admin"),
     },
     {
       label: "Transações",
-      children: [
-        {
-          label: "Nova Despesa",
-          action: () => router.push("/admin/transactions/new?type=expense"),
-        },
-        {
-          label: "Novo Entrada",
-          action: () => router.push("/admin/transactions/new?type=revenue"),
-        },
-      ],
+      action: () => router.push("/admin/transactions"),
+    },
+    {
+      label: "Metas",
+      action: () => router.push("/admin/goals"),
+    },
+    {
+      label: "Orçamentos",
+      action: () => router.push("/admin/budgets"),
     },
   ];
 
@@ -61,7 +67,7 @@ const MainMenuComponent = () => {
         );
       })}
       <Button asChild variant="link" size="sm" className="absolute right-1">
-        <LogoutLink>Sair</LogoutLink>
+        <Link href="/sign-in">Sair</Link>
       </Button>
     </Menubar>
   );

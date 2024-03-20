@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { Button } from "./ui/button";
 import Link from "next/link";
+import Cookies from "js-cookie";
 
 type ItemsT = {
   label: string;
@@ -42,6 +43,13 @@ const MainMenuComponent = () => {
     },
   ];
 
+  const handleLogout = () => {
+    Cookies.remove("token");
+    Cookies.remove("user");
+    Cookies.remove("userId");
+    router.push("/sign-in");
+  };
+
   return (
     <Menubar className="rounded-none">
       {items.map((item, index) => {
@@ -66,8 +74,14 @@ const MainMenuComponent = () => {
           </MenubarMenu>
         );
       })}
-      <Button asChild variant="link" size="sm" className="absolute right-1">
-        <Link href="/sign-in">Sair</Link>
+      <Button
+        asChild
+        variant="link"
+        size="sm"
+        className="absolute right-1"
+        onClick={handleLogout}
+      >
+        Sair
       </Button>
     </Menubar>
   );

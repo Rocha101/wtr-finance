@@ -13,6 +13,7 @@ import { CalendarDateRangePicker } from "@/components/date-range-picker";
 import { DateRange, SelectRangeEventHandler } from "react-day-picker";
 import { addDays, subDays } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 type Transaction = {
   id: number;
@@ -25,6 +26,7 @@ type Transaction = {
 };
 
 const MainAdminPage = () => {
+  const router = useRouter();
   const [widgetValues, setWidgetValues] = useState({
     entries: 0,
     exits: 0,
@@ -38,11 +40,6 @@ const MainAdminPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const widgets = [
-    // {
-    //   title: "Usuários",
-    //   value: widgetValues.users,
-    //   icon: <GrUser />,
-    // },
     {
       title: "Saldo",
       value: widgetValues.entries - widgetValues.exits,
@@ -68,9 +65,8 @@ const MainAdminPage = () => {
       );
       console.log(response.data);
       setWidgetValues((prev) => ({ ...prev, entries: response.data }));
-    } catch (error) {
-      console.log(error);
-      toast("Erro ao buscar entradas");
+    } catch (error: any) {
+      toast(JSON.parse(error.request.response).error);
     }
   };
 
@@ -82,9 +78,8 @@ const MainAdminPage = () => {
       );
       console.log(response.data);
       setWidgetValues((prev) => ({ ...prev, exits: response.data }));
-    } catch (error) {
-      console.log(error);
-      toast("Erro ao buscar saídas");
+    } catch (error: any) {
+      toast(JSON.parse(error.request.response).error);
     } finally {
       setLoading(false);
     }
@@ -97,9 +92,13 @@ const MainAdminPage = () => {
         `/transaction/totalbymonth/${dateRange.from?.toISOString()}/${dateRange.to?.toISOString()}`
       );
       setTransactionsToChart(response.data);
-    } catch (error) {
-      console.log(error);
-      toast("Erro ao buscar transações");
+    } catch (error: any) {
+      if ("Token inválido" === JSON.parse(error.request.response).error) {
+        toast("Sessão expirada, por favor, faça login novamente.");
+        router.push("/sign-in");
+        return;
+      }
+      toast(JSON.parse(error.request.response).error);
     } finally {
       setLoading(false);
     }
@@ -168,7 +167,7 @@ const MainAdminPage = () => {
             <CardTitle>Transações por mês</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
-            <ResponsiveContainer width="100%" height={500}>
+            <ResponsiveContainer width="100%" height={400}>
               <BarChart data={transactionsToChart}>
                 <XAxis
                   dataKey="month"

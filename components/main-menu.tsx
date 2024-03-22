@@ -8,9 +8,7 @@ import {
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import { useRouter } from "next/navigation";
-import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { Button } from "./ui/button";
-import Link from "next/link";
 import Cookies from "js-cookie";
 
 type ItemsT = {
@@ -75,7 +73,6 @@ const MainMenuComponent = () => {
         );
       })}
       <Button
-        asChild
         variant="link"
         size="sm"
         className="absolute right-1"

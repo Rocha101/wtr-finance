@@ -10,35 +10,81 @@ import Loading from "@/components/loading";
 import api from "@/app/utils/api";
 import { toast } from "sonner";
 import NewBudget from "@/components/budgets/new-budget";
-
-type Budget = {
-  id: string;
-  category: string;
-  limit: number;
-};
+import { getUserId } from "@/app/utils/getUserId";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Budgets } from "./budget";
 
 const BudgetPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const modal = searchParams.get("modal");
 
-  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [budgets, setBudgets] = useState<Budgets[]>([]);
   const [loading, setLoading] = useState(false);
 
   const columns = [
     {
       title: "Nome",
-      key: "category",
-      width: "70%",
+      key: "name",
+      width: "60%",
+    },
+    {
+      title: "Categorias",
+      key: "categories",
+      render: (item: Budgets) => {
+        return (
+          <div>
+            {item.categories.map((category, index) => {
+              if (index > 2) return null;
+              if (index === 2)
+                return (
+                  <TooltipProvider key={category.id}>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Badge className="mr-2">...</Badge>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        className="flex flex-col gap-1"
+                        align="start"
+                        alignOffset={30}
+                      >
+                        {item.categories.map((category, index) => {
+                          if (index < 2) return null;
+                          return (
+                            <Badge key={category.id} className="mr-2">
+                              {category.name}
+                            </Badge>
+                          );
+                        })}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                );
+              return (
+                <Badge key={category.id} className="mr-2">
+                  {category.name}
+                </Badge>
+              );
+            })}
+          </div>
+        );
+      },
     },
     {
       title: "Limite",
       key: "limit",
+      money: true,
     },
     {
       title: "Ações",
       key: "actions",
-      render: (item: Budget) => (
+      render: (item: Budgets) => (
         <Button variant="ghost" onClick={() => handleDelete(item.id)}>
           Excluir
         </Button>
@@ -66,7 +112,9 @@ const BudgetPage = () => {
   const fetchBudgets = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/budget");
+      const userId = getUserId();
+      const query = `/budget/${userId}`;
+      const response = await api.get(query);
       setBudgets(response.data);
     } catch (error) {
       toast("Erro ao buscar orçamentos");
@@ -79,7 +127,9 @@ const BudgetPage = () => {
     setLoading(true);
     const fetchBudgets = async () => {
       try {
-        const response = await api.get("/budget");
+        const userId = getUserId();
+        const query = `/budget/${userId}`;
+        const response = await api.get(query);
         console.log(response.data);
         setBudgets(response.data);
       } catch (error) {

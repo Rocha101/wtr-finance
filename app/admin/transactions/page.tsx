@@ -20,12 +20,18 @@ import Loading from "@/components/loading";
 import api from "@/app/utils/api";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { getUserId } from "@/app/utils/getUserId";
+import { Budgets } from "../budgets/budget";
+import { Goals } from "../goals/goals";
+import { GrStorage, GrTarget } from "react-icons/gr";
 
 type Transaction = {
   id: string;
   description: string;
   amount: number;
   type: string;
+  goals: Goals[];
+  budgets: Budgets[];
 };
 
 const TransactionsPage = () => {
@@ -53,9 +59,37 @@ const TransactionsPage = () => {
       key: "type",
       render: (item: Transaction) => {
         return (
-          <Badge variant={item.type === "entry" ? "success" : "destructive"}>
-            {item.type === "entry" ? "Entrada" : "Saída"}
+          <Badge variant={item.type === "INCOME" ? "success" : "destructive"}>
+            {item.type === "INCOME" ? "Entrada" : "Saída"}
           </Badge>
+        );
+      },
+    },
+    {
+      title: "Objetivo",
+      render: (item: Transaction) => {
+        if (!item.goals[0] && !item.budgets[0]) {
+          return (
+            <Badge variant="outline" className="mr-2">
+              Sem objetivo
+            </Badge>
+          );
+        }
+        return (
+          <>
+            {item.goals[0] && (
+              <Badge variant="outline" className="mr-2">
+                <GrTarget className="mr-1" />
+                {item.goals[0].name}
+              </Badge>
+            )}
+            {item.budgets[0] && (
+              <Badge variant="outline" className="mr-2">
+                <GrStorage className="mr-1" />
+                {item.budgets[0].name}
+              </Badge>
+            )}
+          </>
         );
       },
     },
@@ -91,8 +125,8 @@ const TransactionsPage = () => {
 
   const filteredTransactions = transactions.filter((transaction) => {
     switch (type) {
-      case "entry":
-        return transaction.type === "entry";
+      case "income":
+        return transaction.type === "income";
       case "expense":
         return transaction.type === "expense";
       default:
@@ -105,7 +139,9 @@ const TransactionsPage = () => {
   const fetchTransactions = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/transaction");
+      const userId = getUserId();
+      const query = `/transaction/${userId}`;
+      const response = await api.get(query);
       setTransactions(response.data);
     } catch (error) {
       toast("Erro ao buscar transações");
@@ -118,7 +154,9 @@ const TransactionsPage = () => {
     setLoading(true);
     const fetchTransactions = async () => {
       try {
-        const response = await api.get("/transaction");
+        const userId = getUserId();
+        const query = `/transaction/${userId}`;
+        const response = await api.get(query);
         console.log(response.data);
         setTransactions(response.data);
       } catch (error) {
@@ -153,7 +191,7 @@ const TransactionsPage = () => {
                 <SelectGroup>
                   <SelectLabel>Tipo</SelectLabel>
                   <SelectItem value="all">Todas</SelectItem>
-                  <SelectItem value="entry">Entradas</SelectItem>
+                  <SelectItem value="income">Entradas</SelectItem>
                   <SelectItem value="expense">Saídas</SelectItem>
                 </SelectGroup>
               </SelectContent>

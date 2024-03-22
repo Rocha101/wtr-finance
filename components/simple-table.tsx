@@ -20,6 +20,7 @@ type Column = {
   key: string;
   render?: (row: any) => any;
   width?: string;
+  money?: boolean;
 };
 
 interface SimpleTableProps {
@@ -69,6 +70,23 @@ const SimpleTable = ({ columns, rows, rowsPerPage }: SimpleTableProps) => {
     return buttons;
   };
 
+  function formatCurrency(value: number) {
+    return value.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  }
+
+  function renderColumnValue(column: Column, item: any) {
+    if (column.render) {
+      return column.render(item);
+    }
+    if (column.money) {
+      return formatCurrency(item[column.key]);
+    }
+    return item[column.key];
+  }
+
   return (
     <div className="flex flex-col items-end border rounded-md">
       <Table className="border-b">
@@ -90,9 +108,7 @@ const SimpleTable = ({ columns, rows, rowsPerPage }: SimpleTableProps) => {
                   style={{ width: column.width }}
                   className="py-1"
                 >
-                  {column.render
-                    ? column.render(item)
-                    : (item as any)[column.key]}
+                  {renderColumnValue(column, item)}
                 </TableCell>
               ))}
             </TableRow>

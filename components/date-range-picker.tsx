@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { addDays, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { DateRange, SelectRangeEventHandler } from "react-day-picker";
 import {
   Popover,
@@ -60,6 +61,7 @@ export function CalendarDateRangePicker({
             selected={date}
             onSelect={setDate}
             numberOfMonths={2}
+            locale={ptBR}
           />
         </PopoverContent>
       </Popover>

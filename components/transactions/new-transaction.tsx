@@ -23,7 +23,12 @@ import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { GrAddCircle, GrSubtractCircle } from "react-icons/gr";
 import api from "@/app/utils/api";
-import Cookies from "js-cookie";
+import { getUserId } from "@/app/utils/getUserId";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import Loading from "../loading";
+import { Goals } from "@/app/admin/goals/goals";
+import { Budgets } from "@/app/admin/budgets/budget";
 
 const formSchema = z.object({
   description: z.string({
@@ -35,6 +40,8 @@ const formSchema = z.object({
   amount: z.number({
     required_error: "Total obrigatório",
   }),
+  budgetId: z.string({}).optional(),
+  goalId: z.string({}).optional(),
 });
 
 const NewTransaction = () => {
@@ -42,16 +49,21 @@ const NewTransaction = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
+  const [budgets, setBudgets] = useState([]);
+  const [goals, setGoals] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const newData = {
       ...values,
-      userId: Number(Cookies.get("userId")),
+      userId: getUserId(),
     };
+
+    console.log(newData);
 
     try {
       const res = await api.post("/transaction", newData);
-      console.log(res);
+      console.log(res.data);
       form.reset({
         description: "",
         amount: 0,
@@ -59,9 +71,46 @@ const NewTransaction = () => {
       });
       router.push("/admin/transactions");
     } catch (error) {
+      console.log(error);
       console.error(error);
     }
   };
+
+  const fetchBudgets = async () => {
+    setLoading(true);
+    try {
+      const userId = getUserId();
+      const query = `/budget/${userId}`;
+      const response = await api.get(query);
+      console.log(response.data);
+      setBudgets(response.data);
+    } catch (error) {
+      toast("Erro ao buscar orçamentos");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchGoals = async () => {
+    setLoading(true);
+    try {
+      const userId = getUserId();
+      const query = `/goal/${userId}`;
+      const response = await api.get(query);
+      setGoals(response.data);
+    } catch (error) {
+      toast("Erro ao buscar metas");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBudgets();
+    fetchGoals();
+  }, []);
+
+  if (loading) return <Loading />;
 
   return (
     <Form {...form}>
@@ -113,18 +162,66 @@ const NewTransaction = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="expense">
+                  <SelectItem value="EXPENSE">
                     <span className="flex gap-2 items-center">
                       <GrSubtractCircle />
                       Saída
                     </span>
                   </SelectItem>
-                  <SelectItem value="entry">
+                  <SelectItem value="INCOME">
                     <span className="flex gap-2  items-center">
                       <GrAddCircle />
                       Entrada
                     </span>
                   </SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="budgetId"
+          render={({ field }) => (
+            <FormItem className="w-full">
+              <FormLabel>Orçamento</FormLabel>
+              <FormMessage />
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {budgets.map((budget: Budgets) => (
+                    <SelectItem key={budget.id} value={budget.id.toString()}>
+                      {budget.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="goalId"
+          render={({ field }) => (
+            <FormItem className="w-full">
+              <FormLabel>Meta</FormLabel>
+              <FormMessage />
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {goals.map((goal: Goals) => (
+                    <SelectItem key={goal.id} value={goal.id.toString()}>
+                      {goal.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </FormItem>

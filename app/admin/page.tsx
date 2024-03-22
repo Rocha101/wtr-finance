@@ -8,12 +8,22 @@ import { GrCreditCard, GrMoney, GrTransaction, GrUser } from "react-icons/gr";
 import { toast } from "sonner";
 import api from "../utils/api";
 import Loading from "@/components/loading";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import {
+  Bar,
+  BarChart,
+  CartesianAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { CalendarDateRangePicker } from "@/components/date-range-picker";
 import { DateRange, SelectRangeEventHandler } from "react-day-picker";
 import { addDays, subDays } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 type Transaction = {
   id: number;
@@ -28,12 +38,15 @@ type Transaction = {
 const MainAdminPage = () => {
   const router = useRouter();
   const [widgetValues, setWidgetValues] = useState({
-    entries: 0,
-    exits: 0,
+    incomes: 0,
+    expenses: 0,
   });
-  const [transactionsToChart, setTransactionsToChart] = useState<Transaction[]>(
-    []
-  );
+  const [transactionsToChart, setTransactionsToChart] = useState<
+    {
+      month: string;
+      total: number;
+    }[]
+  >([]);
   const [dateRange, setDateRange] = useState<DateRange>({
     from: subDays(new Date(), 1),
     to: addDays(new Date(), 7),
@@ -42,29 +55,28 @@ const MainAdminPage = () => {
   const widgets = [
     {
       title: "Saldo",
-      value: widgetValues.entries - widgetValues.exits,
+      value: widgetValues.incomes - widgetValues.expenses,
       icon: <GrTransaction />,
     },
     {
       title: "Entradas",
-      value: widgetValues.entries,
+      value: widgetValues.incomes,
       icon: <GrMoney />,
     },
     {
       title: "Saídas",
-      value: widgetValues.exits,
+      value: widgetValues.expenses,
       icon: <GrCreditCard />,
     },
   ];
 
-  const getEntriesTotal = async () => {
+  const getIncomesTotal = async () => {
     setLoading(true);
     try {
-      const response = await api.get(
-        `/transaction/total/entry/${dateRange.from?.toISOString()}/${dateRange.to?.toISOString()}`
-      );
-      console.log(response.data);
-      setWidgetValues((prev) => ({ ...prev, entries: response.data }));
+      const userId = Cookies.get("userId");
+      const query = `/transaction/total/${userId}?startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}&type=INCOME`;
+      const response = await api.get(query);
+      setWidgetValues((prev) => ({ ...prev, incomes: response.data }));
     } catch (error: any) {
       toast(JSON.parse(error.request.response).error);
     }
@@ -73,11 +85,10 @@ const MainAdminPage = () => {
   const getExpensesTotal = async () => {
     setLoading(true);
     try {
-      const response = await api.get(
-        `/transaction/total/expense/${dateRange.from?.toISOString()}/${dateRange.to?.toISOString()}`
-      );
-      console.log(response.data);
-      setWidgetValues((prev) => ({ ...prev, exits: response.data }));
+      const userId = Cookies.get("userId");
+      const query = `/transaction/total/${userId}?startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}&type=EXPENSE`;
+      const response = await api.get(query);
+      setWidgetValues((prev) => ({ ...prev, expenses: response.data }));
     } catch (error: any) {
       toast(JSON.parse(error.request.response).error);
     } finally {
@@ -88,9 +99,14 @@ const MainAdminPage = () => {
   const getAllTransactionsToChart = async () => {
     setLoading(true);
     try {
-      const response = await api.get<Transaction[]>(
-        `/transaction/totalbymonth/${dateRange.from?.toISOString()}/${dateRange.to?.toISOString()}`
-      );
+      const userId = Cookies.get("userId");
+      const query = `/transaction/totalbymonth/${userId}?startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}`;
+      const response = await api.get<
+        {
+          month: string;
+          total: number;
+        }[]
+      >(query);
       setTransactionsToChart(response.data);
     } catch (error: any) {
       if ("Token inválido" === JSON.parse(error.request.response).error) {
@@ -106,7 +122,7 @@ const MainAdminPage = () => {
 
   useEffect(() => {
     const fetchTransactions = async () => {
-      await getEntriesTotal();
+      await getIncomesTotal();
       await getExpensesTotal();
       await getAllTransactionsToChart();
     };
@@ -115,7 +131,7 @@ const MainAdminPage = () => {
   }, []);
 
   const fetchDateDependentTransactions = async () => {
-    await getEntriesTotal();
+    await getIncomesTotal();
     await getExpensesTotal();
     await getAllTransactionsToChart();
   };
@@ -169,6 +185,8 @@ const MainAdminPage = () => {
           <CardContent className="pl-2">
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={transactionsToChart}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <Tooltip />
                 <XAxis
                   dataKey="month"
                   stroke="#888888"

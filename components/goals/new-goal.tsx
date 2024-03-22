@@ -9,21 +9,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { GrAddCircle, GrSubtractCircle } from "react-icons/gr";
 import api from "@/app/utils/api";
-import Cookies from "js-cookie";
+import { getUserId } from "@/app/utils/getUserId";
+import { InputTags } from "../tag-input";
 
 const formSchema = z.object({
   name: z.string({
@@ -35,6 +28,11 @@ const formSchema = z.object({
   progress: z.number({
     required_error: "Progresso obrigatório",
   }),
+  categories: z.array(
+    z.string({
+      required_error: "Categoria obrigatória",
+    })
+  ),
 });
 
 const NewGoal = () => {
@@ -43,13 +41,14 @@ const NewGoal = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       progress: 0,
+      categories: [],
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const newData = {
       ...values,
-      userId: Number(Cookies.get("userId")),
+      userId: getUserId(),
     };
 
     try {
@@ -59,6 +58,7 @@ const NewGoal = () => {
         name: "",
         targetAmount: 0,
         progress: 0,
+        categories: [],
       });
       router.push("/admin/goals");
     } catch (error) {
@@ -121,6 +121,19 @@ const NewGoal = () => {
                   field.onChange(parseFloat(e.target.value));
                 }}
               />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="categories"
+          render={({ field }) => (
+            <FormItem className="w-full">
+              <FormLabel>Categorias</FormLabel>
+              <FormMessage />
+              <FormControl>
+                <InputTags {...field} />
+              </FormControl>
             </FormItem>
           )}
         />

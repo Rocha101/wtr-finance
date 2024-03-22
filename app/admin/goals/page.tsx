@@ -10,13 +10,15 @@ import Loading from "@/components/loading";
 import api from "@/app/utils/api";
 import { toast } from "sonner";
 import NewGoal from "@/components/goals/new-goal";
-
-type Goals = {
-  id: string;
-  name: string;
-  targetAmount: number;
-  progress: number;
-};
+import { getUserId } from "@/app/utils/getUserId";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Goals } from "./goals";
 
 const GoalsPage = () => {
   const router = useRouter();
@@ -31,6 +33,48 @@ const GoalsPage = () => {
       title: "Nome",
       key: "name",
       width: "70%",
+    },
+    {
+      title: "Categorias",
+      key: "categories",
+      render: (item: Goals) => {
+        return (
+          <div>
+            {item.categories.map((category, index) => {
+              if (index > 2) return null;
+              if (index === 2)
+                return (
+                  <TooltipProvider key={category.id}>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Badge className="mr-2">...</Badge>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        className="flex flex-col gap-1"
+                        align="start"
+                        alignOffset={30}
+                      >
+                        {item.categories.map((category, index) => {
+                          if (index < 2) return null;
+                          return (
+                            <Badge key={category.id} className="mr-2">
+                              {category.name}
+                            </Badge>
+                          );
+                        })}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                );
+              return (
+                <Badge key={category.id} className="mr-2">
+                  {category.name}
+                </Badge>
+              );
+            })}
+          </div>
+        );
+      },
     },
     {
       title: "Total",
@@ -72,7 +116,9 @@ const GoalsPage = () => {
   const fetchGoals = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/goal");
+      const userId = getUserId();
+      const query = `/goal/${userId}`;
+      const response = await api.get(query);
       setGoals(response.data);
     } catch (error) {
       toast("Erro ao buscar metas");
@@ -85,7 +131,9 @@ const GoalsPage = () => {
     setLoading(true);
     const fetchGoals = async () => {
       try {
-        const response = await api.get("/goal");
+        const userId = getUserId();
+        const query = `/goal/${userId}`;
+        const response = await api.get(query);
         console.log(response.data);
         setGoals(response.data);
       } catch (error) {

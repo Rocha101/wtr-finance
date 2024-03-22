@@ -9,26 +9,24 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { GrAddCircle, GrSubtractCircle } from "react-icons/gr";
 import api from "@/app/utils/api";
-import Cookies from "js-cookie";
+import { InputTags } from "../tag-input";
+import { getUserId } from "@/app/utils/getUserId";
 
 const formSchema = z.object({
-  category: z.string({
-    required_error: "Categoria obrigatória",
+  name: z.string({
+    required_error: "Nome obrigatório",
   }),
+  categories: z.array(
+    z.string({
+      required_error: "Categoria obrigatória",
+    })
+  ),
   limit: z.number({
     required_error: "Limite obrigatório",
   }),
@@ -38,23 +36,30 @@ const NewBudget = () => {
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      categories: [],
+    },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const newData = {
       ...values,
-      userId: Number(Cookies.get("userId")),
+      userId: getUserId(),
     };
+
+    console.log(newData);
 
     try {
       const res = await api.post("/budget", newData);
       console.log(res);
       form.reset({
-        category: "",
         limit: 0,
+        name: "",
+        categories: [],
       });
       router.push("/admin/budgets");
     } catch (error) {
+      console.log(error);
       console.error(error);
     }
   };
@@ -64,13 +69,26 @@ const NewBudget = () => {
       <form className="w-full flex flex-col items-center gap-3">
         <FormField
           control={form.control}
-          name="category"
+          name="name"
           render={({ field }) => (
             <FormItem className="w-full">
-              <FormLabel>Categoria</FormLabel>
+              <FormLabel>Nome</FormLabel>
               <FormMessage />
               <FormControl>
                 <Input {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="categories"
+          render={({ field }) => (
+            <FormItem className="w-full">
+              <FormLabel>Categorias</FormLabel>
+              <FormMessage />
+              <FormControl>
+                <InputTags {...field} />
               </FormControl>
             </FormItem>
           )}

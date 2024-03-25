@@ -10,13 +10,16 @@ import {
 import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import Cookies from "js-cookie";
+import { ModeToggle } from "./mode-toggle";
 
 type ItemsT = {
   label: string;
   action?: () => void;
+  disabled?: boolean;
   children?: {
     label: string;
     action: () => void;
+    disabled?: boolean;
   }[];
 }[];
 
@@ -38,6 +41,21 @@ const MainMenuComponent = () => {
     {
       label: "Orçamentos",
       action: () => router.push("/admin/budgets"),
+      children: [
+        {
+          label: "Orçamentos",
+          action: () => router.push("/admin/budgets"),
+        },
+        {
+          label: "Categorias",
+          action: () => router.push("/admin/categories"),
+        },
+      ],
+    },
+    {
+      label: "Recorrentes",
+      action: () => router.push("/admin/recurrents"),
+      disabled: true,
     },
   ];
 
@@ -55,31 +73,35 @@ const MainMenuComponent = () => {
           <MenubarMenu key={index}>
             {item.children ? (
               <>
-                <MenubarTrigger>{item.label}</MenubarTrigger>
+                <MenubarTrigger disabled={item?.disabled}>
+                  {item.label}
+                </MenubarTrigger>
                 <MenubarContent>
                   {item.children.map((child, index) => (
-                    <MenubarItem key={index} onClick={child.action}>
+                    <MenubarItem
+                      key={index}
+                      onClick={child.action}
+                      disabled={child?.disabled}
+                    >
                       {child.label}
                     </MenubarItem>
                   ))}
                 </MenubarContent>
               </>
             ) : (
-              <MenubarTrigger onClick={item?.action}>
+              <MenubarTrigger onClick={item?.action} disabled={item?.disabled}>
                 {item.label}
               </MenubarTrigger>
             )}
           </MenubarMenu>
         );
       })}
-      <Button
-        variant="link"
-        size="sm"
-        className="absolute right-1"
-        onClick={handleLogout}
-      >
-        Sair
-      </Button>
+      <div className="flex items-center gap-3 absolute right-1">
+        <ModeToggle />
+        <Button variant="link" size="sm" onClick={handleLogout}>
+          Sair
+        </Button>
+      </div>
     </Menubar>
   );
 };

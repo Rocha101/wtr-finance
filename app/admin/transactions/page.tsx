@@ -1,21 +1,12 @@
 "use client";
 
 import PageHeader from "@/components/page-header";
-import SimpleTable from "@/components/simple-table";
+import SimpleTable from "@/components/table/simple-table";
 import NewTransaction from "@/components/transactions/new-transaction";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import Loading from "@/components/loading";
 import api from "@/app/utils/api";
 import { toast } from "sonner";
@@ -24,6 +15,10 @@ import { getUserId } from "@/app/utils/getUserId";
 import { Budgets } from "../budgets/budget";
 import { Goals } from "../goals/goals";
 import { GrStorage, GrTarget } from "react-icons/gr";
+import { Column } from "@/components/table/simple-table.d";
+import { CalendarDateRangePicker } from "@/components/date-range-picker";
+import { DateRange, SelectRangeEventHandler } from "react-day-picker";
+import { subDays } from "date-fns";
 
 type Transaction = {
   id: string;
@@ -43,12 +38,17 @@ const TransactionsPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [type, setType] = useState("all");
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: subDays(new Date(), 30),
+    to: new Date(),
+  });
 
-  const columns = [
+  const columns: Column[] = [
     {
       title: "Nome",
       key: "description",
       width: "70%",
+      search: true,
     },
     {
       title: "Total",
@@ -64,9 +64,17 @@ const TransactionsPage = () => {
           </Badge>
         );
       },
+      search: true,
+      type: "select",
+      options: [
+        { value: "NULL", label: "Todos" },
+        { value: "INCOME", label: "Entrada" },
+        { value: "EXPENSE", label: "Saída" },
+      ],
     },
     {
       title: "Objetivo",
+      key: "goals",
       render: (item: Transaction) => {
         if (!item.goals[0] && !item.budgets[0]) {
           return (
@@ -126,9 +134,9 @@ const TransactionsPage = () => {
   const filteredTransactions = transactions.filter((transaction) => {
     switch (type) {
       case "income":
-        return transaction.type === "income";
+        return transaction.type === "INCOME";
       case "expense":
-        return transaction.type === "expense";
+        return transaction.type === "EXPENSE";
       default:
         return true;
     }
@@ -140,7 +148,7 @@ const TransactionsPage = () => {
     setLoading(true);
     try {
       const userId = getUserId();
-      const query = `/transaction/${userId}`;
+      const query = `/transaction/${userId}?startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}`;
       const response = await api.get(query);
       setTransactions(response.data);
     } catch (error) {
@@ -168,57 +176,48 @@ const TransactionsPage = () => {
     fetchTransactions();
   }, [modal]);
 
-  if (loading) return <Loading />;
-
   return (
-    <div className="h-full w-full">
-      <PageHeader
-        title="Transações"
-        description="Lista de transações"
-        backlink="/admin"
-      />
-      <div className="h-full w-full flex flex-col gap-3 items-center justify-center mb-3 pt-3 mt-6">
-        <div className="w-full p-4 items-end">
-          <div className="w-full flex items-center gap-3 justify-end">
-            <Select
-              value={type}
-              onValueChange={(value) => handleTypeChange(value as string)}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filtro por tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Tipo</SelectLabel>
-                  <SelectItem value="all">Todas</SelectItem>
-                  <SelectItem value="income">Entradas</SelectItem>
-                  <SelectItem value="expense">Saídas</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <Button
-              onClick={() => router.push("/admin/transactions?modal=new")}
-            >
-              Nova transação
-            </Button>
-          </div>
-          <div className="mt-2">
-            <SimpleTable
-              columns={columns}
-              rows={filteredTransactions}
-              rowsPerPage={12}
-            />
-          </div>
+    <Suspense fallback={<Loading />}>
+      <div className="h-full w-full">
+        <PageHeader
+          title="Transações"
+          description="Lista de transações"
+          backlink="/admin"
+        />
+        <div className="h-full w-full mt-14 p-3">
+          <SimpleTable
+            columns={columns}
+            rows={filteredTransactions}
+            rowsPerPage={11}
+            searchable
+            actions={
+              <Button
+                onClick={() => router.push("/admin/transactions?modal=new")}
+              >
+                Nova transação
+              </Button>
+            }
+            advancedSearch={
+              <Suspense fallback={<Loading />}>
+                <CalendarDateRangePicker
+                  date={dateRange}
+                  setDate={setDateRange as SelectRangeEventHandler}
+                  updateFn={fetchTransactions}
+                />
+              </Suspense>
+            }
+            loading={loading}
+          />
         </div>
+        <Suspense fallback={<Loading />}>
+          <Dialog open={modal === "new"} onOpenChange={handleCloseModal}>
+            <DialogContent className="sm:max-w-[425px]">
+              <NewTransaction />
+            </DialogContent>
+          </Dialog>
+        </Suspense>
       </div>
-      <Suspense fallback={<Loading />}>
-        <Dialog open={modal === "new"} onOpenChange={handleCloseModal}>
-          <DialogContent className="sm:max-w-[425px]">
-            <NewTransaction />
-          </DialogContent>
-        </Dialog>
-      </Suspense>
-    </div>
+    </Suspense>
   );
 };
 

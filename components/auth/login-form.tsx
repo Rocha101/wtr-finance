@@ -14,11 +14,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useCallback } from "react";
+import { useState } from "react";
 import api from "@/app/utils/api";
 import Cookies from "js-cookie";
 import { toast } from "sonner";
+import { GrFormView, GrHide } from "react-icons/gr";
+import { PasswordInput } from "../password-input";
 
 const formSchema = z.object({
   email: z.string({
@@ -35,45 +36,44 @@ const LoginForm = () => {
     resolver: zodResolver(formSchema),
   });
 
-  const onSubmit = useCallback(
-    (values: z.infer<typeof formSchema>) => {
-      console.log(values);
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      };
-      api
-        .post("/auth/login", values, config)
-        .then((res) => {
-          console.log(res);
-          const { data } = res;
-          const { user, token } = data;
-          Cookies.set("user", JSON.stringify(user));
-          Cookies.set("userId", user.id);
-          Cookies.set("token", token);
-          toast("Login realizado com sucesso!");
-          router.push("/admin");
-        })
-        .catch((err) => {
-          console.log(err);
-          toast(JSON.parse(err.request.response).error);
-        });
-    },
-    [router]
-  );
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    console.log(values);
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    };
+    api
+      .post("/auth/login", values, config)
+      .then((res) => {
+        console.log(res);
+        const { data } = res;
+        const { user, token } = data;
+        Cookies.set("user", JSON.stringify(user));
+        Cookies.set("userId", user.id);
+        Cookies.set("token", token);
+        toast("Login realizado com sucesso!");
+        router.push("/admin");
+      })
+      .catch((err) => {
+        console.log(err);
+        toast(JSON.parse(err.request.response).error);
+      });
+  };
 
   return (
     <Form {...form}>
-      <form className="w-full flex flex-col items-center gap-3">
+      <form
+        className="w-full flex flex-col items-center gap-3"
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
         <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem className="w-full">
               <FormLabel>Email</FormLabel>
-
               <FormControl>
                 <Input type="email" {...field} />
               </FormControl>
@@ -87,21 +87,24 @@ const LoginForm = () => {
           render={({ field }) => (
             <FormItem className="w-full">
               <FormLabel>Senha</FormLabel>
-
               <FormControl>
-                <Input type="password" {...field} />
+                <PasswordInput {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <div className="w-full flex justify-between mt-2">
-          <Link href="/sign-up" passHref>
-            <Button variant="link" className="p-0">
-              Quero criar uma conta
-            </Button>
-          </Link>
-          <Button className="" onClick={form.handleSubmit(onSubmit)}>
+          <Button
+            type="button"
+            variant="link"
+            className="p-0"
+            onClick={() => router.push("/sign-up")}
+          >
+            Quero criar uma conta
+          </Button>
+
+          <Button className="" type="submit">
             Login
           </Button>
         </div>

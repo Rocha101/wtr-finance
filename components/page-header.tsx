@@ -22,7 +22,9 @@ const PageHeader = ({ title, description, backlink }: PageHeaderProps) => {
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold">{title}</h1>
         {description && (
-          <p className="text-sm text-gray-600 ml-0.5">{description}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-100 ml-0.5">
+            {description}
+          </p>
         )}
       </div>
     </div>

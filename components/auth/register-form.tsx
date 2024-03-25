@@ -19,6 +19,7 @@ import { useState } from "react";
 import api from "@/app/utils/api";
 import { toast } from "sonner";
 import Loading from "../loading";
+import { PasswordInput } from "../password-input";
 
 const formSchema = z.object({
   username: z.string({
@@ -72,7 +73,10 @@ const RegisterForm = () => {
 
   return (
     <Form {...form}>
-      <form className="w-full flex flex-col items-center gap-3">
+      <form
+        className="w-full flex flex-col items-center gap-3"
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
         <FormField
           control={form.control}
           name="username"
@@ -106,19 +110,30 @@ const RegisterForm = () => {
             <FormItem className="w-full">
               <FormLabel>Senha</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <PasswordInput
+                  {...field}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      onSubmit(form.getValues());
+                    }
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <div className="w-full flex justify-between mt-2">
-          <Link href="/sign-in" passHref>
-            <Button variant="link" className="p-0">
-              Já tenho conta
-            </Button>
-          </Link>
-          <Button className="" onClick={form.handleSubmit(onSubmit)}>
+          <Button
+            type="button"
+            variant="link"
+            className="p-0"
+            onClick={() => router.push("/sign-in")}
+          >
+            Já tenho conta
+          </Button>
+
+          <Button type="submit" className="">
             Registro
           </Button>
         </div>

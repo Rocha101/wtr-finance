@@ -184,7 +184,7 @@ const NewTransaction = () => {
           name="budgetId"
           render={({ field }) => (
             <FormItem className="w-full">
-              <FormLabel>Orçamento</FormLabel>
+              <FormLabel>Orçamento (opcional)</FormLabel>
               <FormMessage />
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
@@ -208,7 +208,7 @@ const NewTransaction = () => {
           name="goalId"
           render={({ field }) => (
             <FormItem className="w-full">
-              <FormLabel>Meta</FormLabel>
+              <FormLabel>Meta (opcional)</FormLabel>
               <FormMessage />
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>

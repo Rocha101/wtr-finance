@@ -9,9 +9,9 @@ interface AdminLayoutProps {
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   return (
-    <div>
+    <div className="h-screen ">
       <MainMenuComponent />
-      <div className="mt-3">{children}</div>
+      <div className="pt-3">{children}</div>
     </div>
   );
 };

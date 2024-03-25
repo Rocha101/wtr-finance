@@ -1,7 +1,5 @@
 import LoginForm from "@/components/auth/login-form";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import Link from "next/link";
 
 const SignInPage = () => {
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import PageHeader from "@/components/page-header";
-import SimpleTable from "@/components/simple-table";
+import SimpleTable from "@/components/table/simple-table";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -33,6 +33,7 @@ const GoalsPage = () => {
       title: "Nome",
       key: "name",
       width: "70%",
+      search: true,
     },
     {
       title: "Categorias",
@@ -145,35 +146,37 @@ const GoalsPage = () => {
     fetchGoals();
   }, [modal]);
 
-  if (loading) return <Loading />;
-
   return (
-    <div className="h-full w-full">
-      <PageHeader
-        title="Metas"
-        description="Lista de metas"
-        backlink="/admin"
-      />
-      <div className="h-full w-full flex flex-col gap-3 items-center justify-center mb-3 pt-3 mt-6">
-        <div className="w-full p-4 items-end">
-          <div className="w-full flex items-center gap-3 justify-end">
-            <Button onClick={() => router.push("/admin/goals?modal=new")}>
-              Nova meta
-            </Button>
-          </div>
-          <div className="mt-2">
-            <SimpleTable columns={columns} rows={goals} rowsPerPage={12} />
-          </div>
+    <Suspense fallback={<Loading />}>
+      <div className="h-full w-full">
+        <PageHeader
+          title="Metas"
+          description="Lista de metas"
+          backlink="/admin"
+        />
+        <div className="h-full w-full mt-14 p-3">
+          <SimpleTable
+            columns={columns}
+            rows={goals}
+            rowsPerPage={11}
+            searchable
+            actions={
+              <Button onClick={() => router.push("/admin/goals?modal=new")}>
+                Nova meta
+              </Button>
+            }
+            loading={loading}
+          />
         </div>
+        <Suspense fallback={<Loading />}>
+          <Dialog open={modal === "new"} onOpenChange={handleCloseModal}>
+            <DialogContent className="sm:max-w-[425px]">
+              <NewGoal />
+            </DialogContent>
+          </Dialog>
+        </Suspense>
       </div>
-      <Suspense fallback={<Loading />}>
-        <Dialog open={modal === "new"} onOpenChange={handleCloseModal}>
-          <DialogContent className="sm:max-w-[425px]">
-            <NewGoal />
-          </DialogContent>
-        </Dialog>
-      </Suspense>
-    </div>
+    </Suspense>
   );
 };
 

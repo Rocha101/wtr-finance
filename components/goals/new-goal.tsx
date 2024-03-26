@@ -15,7 +15,6 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import api from "@/app/utils/api";
-import { getUserId } from "@/app/utils/getUserId";
 import { InputTags } from "../tag-input";
 
 const formSchema = z.object({
@@ -46,13 +45,8 @@ const NewGoal = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const newData = {
-      ...values,
-      userId: getUserId(),
-    };
-
     try {
-      const res = await api.post("/goal", newData);
+      const res = await api.post("/goal", values);
       console.log(res);
       form.reset({
         name: "",
@@ -75,10 +69,11 @@ const NewGoal = () => {
           render={({ field }) => (
             <FormItem className="w-full">
               <FormLabel>Nome</FormLabel>
-              <FormMessage />
+
               <FormControl>
                 <Input {...field} />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -88,7 +83,7 @@ const NewGoal = () => {
           render={({ field }) => (
             <FormItem className="w-full">
               <FormLabel>Total (objetivo)</FormLabel>
-              <FormMessage />
+
               <FormControl>
                 <Input
                   type="number"
@@ -99,6 +94,7 @@ const NewGoal = () => {
                   }}
                 />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -110,7 +106,7 @@ const NewGoal = () => {
               <FormLabel>
                 Progresso <b>{field.value}%</b>
               </FormLabel>
-              <FormMessage />
+
               <Input
                 {...field}
                 type="range"
@@ -121,6 +117,7 @@ const NewGoal = () => {
                   field.onChange(parseFloat(e.target.value));
                 }}
               />
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -130,10 +127,11 @@ const NewGoal = () => {
           render={({ field }) => (
             <FormItem className="w-full">
               <FormLabel>Categorias</FormLabel>
-              <FormMessage />
+
               <FormControl>
                 <InputTags {...field} />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />

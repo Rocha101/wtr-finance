@@ -8,9 +8,8 @@ import {
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import { useRouter } from "next/navigation";
-import { Button } from "./ui/button";
-import Cookies from "js-cookie";
 import { ModeToggle } from "./mode-toggle";
+import { UserButton } from "@clerk/nextjs";
 
 type ItemsT = {
   label: string;
@@ -39,18 +38,8 @@ const MainMenuComponent = () => {
       action: () => router.push("/admin/goals"),
     },
     {
-      label: "Orçamentos",
-      action: () => router.push("/admin/budgets"),
-      children: [
-        {
-          label: "Orçamentos",
-          action: () => router.push("/admin/budgets"),
-        },
-        {
-          label: "Categorias",
-          action: () => router.push("/admin/categories"),
-        },
-      ],
+      label: "Categorias",
+      action: () => router.push("/admin/categories"),
     },
     {
       label: "Recorrentes",
@@ -58,13 +47,6 @@ const MainMenuComponent = () => {
       disabled: true,
     },
   ];
-
-  const handleLogout = () => {
-    Cookies.remove("token");
-    Cookies.remove("user");
-    Cookies.remove("userId");
-    router.push("/sign-in");
-  };
 
   return (
     <Menubar className="rounded-none">
@@ -98,9 +80,7 @@ const MainMenuComponent = () => {
       })}
       <div className="flex items-center gap-3 absolute right-1">
         <ModeToggle />
-        <Button variant="link" size="sm" onClick={handleLogout}>
-          Sair
-        </Button>
+        <UserButton />
       </div>
     </Menubar>
   );

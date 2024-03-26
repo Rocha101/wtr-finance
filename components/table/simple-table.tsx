@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { GrClose } from "react-icons/gr";
+import { GrClose, GrDown, GrLinkDown, GrLinkUp, GrUp } from "react-icons/gr";
 import { Column } from "./simple-table.d";
 import SimpleTableSkeleton from "./simple-table-skeleton";
 
@@ -38,6 +38,39 @@ interface SimpleTableProps {
   advancedSearch?: any;
   loading?: boolean;
 }
+
+const HeaderSortable = ({
+  column,
+  sort,
+  setSort,
+}: {
+  column: Column;
+  sort: string;
+  setSort: (value: string) => void;
+}) => {
+  return (
+    <Button
+      variant="link"
+      onClick={() => {
+        if (sort === column.key) {
+          setSort(`-${column.key}`);
+        } else {
+          setSort(column.key);
+        }
+      }}
+      className="flex items-center p-0"
+    >
+      {column.title}
+      {sort === column.key ? (
+        <GrLinkDown className="h-3 w-3 ml-2" />
+      ) : sort === `-${column.key}` ? (
+        <GrLinkUp className="h-3 w-3 ml-2" />
+      ) : (
+        <GrLinkUp className="h-3 w-3 ml-2" />
+      )}
+    </Button>
+  );
+};
 
 const SimpleTable = ({
   columns,
@@ -58,6 +91,12 @@ const SimpleTable = ({
       : rows
   );
   const [searchValues, setSearchValues] = useState<any>({});
+  const defaultColumnSort = columns.find((column) => column.defaultSort);
+  const [sort, setSort] = useState(
+    defaultColumnSort
+      ? { [defaultColumnSort.key]: defaultColumnSort.defaultSort }
+      : {}
+  );
 
   const totalPages = rowsPerPage ? Math.ceil(rows.length / rowsPerPage) : 1;
 
@@ -115,8 +154,20 @@ const SimpleTable = ({
         return value === "null" ? true : row[key].toLowerCase().includes(value);
       });
     });
-    setCurrentRows(filteredRows);
-  }, [searchValues, rows]);
+    const sortedRows = filteredRows.sort((a, b) => {
+      if (sort) {
+        const key = Object.keys(sort)[0];
+        const value = sort[key];
+        if (value === key) {
+          return a[key] > b[key] ? 1 : -1;
+        } else {
+          return a[key] < b[key] ? 1 : -1;
+        }
+      }
+      return 0;
+    });
+    setCurrentRows(sortedRows);
+  }, [searchValues, rows, sort]);
 
   return (
     <div className="flex flex-col items-end border rounded-md bg-card">
@@ -211,8 +262,17 @@ const SimpleTable = ({
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={column.key} style={{ width: column.width }}>
-                  {column.title}
+                <TableHead key={column.key}>
+                  {column.sortable ? (
+                    <HeaderSortable
+                      key={column.key}
+                      column={column}
+                      sort={sort[column.key] as string}
+                      setSort={(value) => setSort({ [column.key]: value })}
+                    />
+                  ) : (
+                    <span>{column.title}</span>
+                  )}
                 </TableHead>
               ))}
             </TableRow>

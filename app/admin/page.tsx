@@ -15,7 +15,6 @@ import {
   GrFormNextLink,
   GrMoney,
   GrTransaction,
-  GrUser,
 } from "react-icons/gr";
 import { toast } from "sonner";
 import api from "../utils/api";
@@ -23,7 +22,6 @@ import Loading from "@/components/loading";
 import {
   Bar,
   BarChart,
-  CartesianAxis,
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
@@ -40,14 +38,11 @@ import {
 } from "@/components/ui/table";
 import { CalendarDateRangePicker } from "@/components/date-range-picker";
 import { DateRange, SelectRangeEventHandler } from "react-day-picker";
-import { addDays, subDays } from "date-fns";
+import { subDays } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import { RecurrentTransactions } from "./recurrents/recurrents";
 import { Badge } from "@/components/ui/badge";
-import SimpleTable from "@/components/table/simple-table";
-import { getUserId } from "../utils/getUserId";
 import Link from "next/link";
 import CountUp from "react-countup";
 
@@ -122,8 +117,7 @@ const MainAdminPage = () => {
   const getIncomesTotal = async () => {
     setLoading(true);
     try {
-      const userId = Cookies.get("userId");
-      const query = `/transaction/total/${userId}?startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}&type=INCOME`;
+      const query = `/transaction/total/&startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}&type=INCOME`;
       const response = await api.get(query);
       setWidgetValues((prev) => ({ ...prev, incomes: response.data }));
     } catch (error: any) {
@@ -134,8 +128,7 @@ const MainAdminPage = () => {
   const getExpensesTotal = async () => {
     setLoading(true);
     try {
-      const userId = Cookies.get("userId");
-      const query = `/transaction/total/${userId}?startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}&type=EXPENSE`;
+      const query = `/transaction/total/&startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}&type=EXPENSE`;
       const response = await api.get(query);
       setWidgetValues((prev) => ({ ...prev, expenses: response.data }));
     } catch (error: any) {
@@ -148,8 +141,7 @@ const MainAdminPage = () => {
   const getAllTransactionsToChart = async () => {
     setLoading(true);
     try {
-      const userId = Cookies.get("userId");
-      const query = `/transaction/totalbymonth/${userId}?startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}`;
+      const query = `/transaction/totalbymonth/&startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}`;
       const response = await api.get<
         {
           month: string;
@@ -172,8 +164,7 @@ const MainAdminPage = () => {
   const fetchRecentTransactions = async () => {
     setLoading(true);
     try {
-      const userId = getUserId();
-      const query = `/transaction/${userId}?startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}`;
+      const query = `/transaction/&startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}`;
       const response = await api.get(query);
       const mostRecent = response.data.slice(0, 7);
       setTransactions(mostRecent);

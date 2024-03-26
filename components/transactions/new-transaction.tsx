@@ -23,12 +23,10 @@ import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { GrAddCircle, GrSubtractCircle } from "react-icons/gr";
 import api from "@/app/utils/api";
-import { getUserId } from "@/app/utils/getUserId";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Loading from "../loading";
 import { Goals } from "@/app/admin/goals/goals";
-import { Budgets } from "@/app/admin/budgets/budget";
 
 const formSchema = z.object({
   description: z.string({
@@ -40,8 +38,7 @@ const formSchema = z.object({
   amount: z.number({
     required_error: "Total obrigatório",
   }),
-  budgetId: z.string({}).optional(),
-  goalId: z.string({}).optional(),
+  goalId: z.optional(z.string()),
 });
 
 const NewTransaction = () => {
@@ -49,53 +46,36 @@ const NewTransaction = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
-  const [budgets, setBudgets] = useState([]);
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const newData = {
       ...values,
-      userId: getUserId(),
+      repeatInterval: "MONTHLY",
     };
 
     console.log(newData);
 
     try {
-      const res = await api.post("/transaction", newData);
-      console.log(res.data);
+      const res = await api.post("/transactions", newData);
+      console.log(res);
       form.reset({
         description: "",
         amount: 0,
         type: "",
       });
       router.push("/admin/transactions");
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.log(error.response);
       console.error(error);
-    }
-  };
-
-  const fetchBudgets = async () => {
-    setLoading(true);
-    try {
-      const userId = getUserId();
-      const query = `/budget/${userId}`;
-      const response = await api.get(query);
-      console.log(response.data);
-      setBudgets(response.data);
-    } catch (error) {
-      toast("Erro ao buscar orçamentos");
-    } finally {
-      setLoading(false);
     }
   };
 
   const fetchGoals = async () => {
     setLoading(true);
     try {
-      const userId = getUserId();
-      const query = `/goal/${userId}`;
+      const query = `/goal`;
       const response = await api.get(query);
       setGoals(response.data);
     } catch (error) {
@@ -106,7 +86,6 @@ const NewTransaction = () => {
   };
 
   useEffect(() => {
-    fetchBudgets();
     fetchGoals();
   }, []);
 
@@ -121,10 +100,10 @@ const NewTransaction = () => {
           render={({ field }) => (
             <FormItem className="w-full">
               <FormLabel>Nome</FormLabel>
-              <FormMessage />
               <FormControl>
                 <Input {...field} />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -134,7 +113,7 @@ const NewTransaction = () => {
           render={({ field }) => (
             <FormItem className="w-full">
               <FormLabel>Total</FormLabel>
-              <FormMessage />
+
               <FormControl>
                 <Input
                   type="number"
@@ -145,6 +124,7 @@ const NewTransaction = () => {
                   }}
                 />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -154,7 +134,7 @@ const NewTransaction = () => {
           render={({ field }) => (
             <FormItem className="w-full">
               <FormLabel>Tipo</FormLabel>
-              <FormMessage />
+
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger className="w-full">
@@ -176,30 +156,7 @@ const NewTransaction = () => {
                   </SelectItem>
                 </SelectContent>
               </Select>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="budgetId"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel>Orçamento (opcional)</FormLabel>
               <FormMessage />
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {budgets.map((budget: Budgets) => (
-                    <SelectItem key={budget.id} value={budget.id.toString()}>
-                      {budget.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </FormItem>
           )}
         />
@@ -209,7 +166,6 @@ const NewTransaction = () => {
           render={({ field }) => (
             <FormItem className="w-full">
               <FormLabel>Meta (opcional)</FormLabel>
-              <FormMessage />
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger className="w-full">
@@ -224,6 +180,7 @@ const NewTransaction = () => {
                   ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
             </FormItem>
           )}
         />

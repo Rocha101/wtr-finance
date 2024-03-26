@@ -11,8 +11,6 @@ import Loading from "@/components/loading";
 import api from "@/app/utils/api";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { getUserId } from "@/app/utils/getUserId";
-import { Budgets } from "../budgets/budget";
 import { Goals } from "../goals/goals";
 import { GrStorage, GrTarget } from "react-icons/gr";
 import { Column } from "@/components/table/simple-table.d";
@@ -26,7 +24,6 @@ type Transaction = {
   amount: number;
   type: string;
   goals: Goals[];
-  budgets: Budgets[];
 };
 
 const TransactionsPage = () => {
@@ -47,12 +44,14 @@ const TransactionsPage = () => {
     {
       title: "Nome",
       key: "description",
-      width: "70%",
+      width: "40%",
       search: true,
+      sortable: true,
     },
     {
       title: "Total",
       key: "amount",
+      sortable: true,
     },
     {
       title: "Tipo",
@@ -76,7 +75,7 @@ const TransactionsPage = () => {
       title: "Objetivo",
       key: "goals",
       render: (item: Transaction) => {
-        if (!item.goals[0] && !item.budgets[0]) {
+        if (!item.goals[0]) {
           return (
             <Badge variant="outline" className="mr-2">
               Sem objetivo
@@ -89,12 +88,6 @@ const TransactionsPage = () => {
               <Badge variant="outline" className="mr-2">
                 <GrTarget className="mr-1" />
                 {item.goals[0].name}
-              </Badge>
-            )}
-            {item.budgets[0] && (
-              <Badge variant="outline" className="mr-2">
-                <GrStorage className="mr-1" />
-                {item.budgets[0].name}
               </Badge>
             )}
           </>
@@ -144,12 +137,18 @@ const TransactionsPage = () => {
 
   const handleCloseModal = () => router.push("/admin/transactions");
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = async ({
+    startDate,
+    endDate,
+  }: {
+    startDate: Date;
+    endDate: Date;
+  }) => {
     setLoading(true);
     try {
-      const userId = getUserId();
-      const query = `/transaction/${userId}?startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}`;
+      const query = `/transactions?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`;
       const response = await api.get(query);
+      console.log(response.data);
       setTransactions(response.data);
     } catch (error) {
       toast("Erro ao buscar transações");
@@ -159,21 +158,10 @@ const TransactionsPage = () => {
   };
 
   useEffect(() => {
-    setLoading(true);
-    const fetchTransactions = async () => {
-      try {
-        const userId = getUserId();
-        const query = `/transaction/${userId}`;
-        const response = await api.get(query);
-        console.log(response.data);
-        setTransactions(response.data);
-      } catch (error) {
-        toast("Erro ao buscar transações");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTransactions();
+    fetchTransactions({
+      startDate: subDays(new Date(), 30),
+      endDate: new Date(),
+    });
   }, [modal]);
 
   return (
@@ -202,7 +190,12 @@ const TransactionsPage = () => {
                 <CalendarDateRangePicker
                   date={dateRange}
                   setDate={setDateRange as SelectRangeEventHandler}
-                  updateFn={fetchTransactions}
+                  updateFn={async () =>
+                    fetchTransactions({
+                      startDate: dateRange.from as Date,
+                      endDate: dateRange.to as Date,
+                    })
+                  }
                 />
               </Suspense>
             }

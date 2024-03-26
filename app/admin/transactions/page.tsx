@@ -115,7 +115,10 @@ const TransactionsPage = () => {
     try {
       await api.delete(`/transaction/${id}`);
       toast("Transação excluída com sucesso");
-      fetchTransactions();
+      fetchTransactions({
+        startDate: dateRange.from as Date,
+        endDate: dateRange.to as Date,
+      });
     } catch (error) {
       console.error(error);
       toast("Erro ao excluir transação");

@@ -78,7 +78,7 @@
 }
 
 .cl-socialButtonsIconButton {
-  @apply  bg-foreground hover:bg-foreground text-foreground border-primary;
+  @apply bg-card dark:bg-foreground hover:bg-card dark:hover:bg-foreground text-foreground border-primary;
 }
 
 

@@ -208,7 +208,7 @@ const MainAdminPage = () => {
                 data={transactionsToChart}
                 index="month"
                 categories={["total"]}
-                colors={["purple"]}
+                colors={["primary"]}
                 yAxisWidth={48}
                 noDataText="Sem dados"
                 showLegend={false}

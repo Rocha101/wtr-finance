@@ -164,15 +164,13 @@ const SimpleTable = ({
       return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
     }
   });
-  const filteredRows: any[] = rows.filter((row) => {
+  const filteredRows: any[] = sortedRows.filter((row) => {
     return Object.keys(searchValues).every((key) => {
       const value = searchValues[key].toLowerCase();
       return value === "null" ? true : row[key].toLowerCase().includes(value);
     });
   });
   const currentRows = filteredRows.slice(startIndex, endIndex);
-
-  console.log(sortState);
 
   return (
     <div className="flex flex-col items-end border rounded-md bg-card">

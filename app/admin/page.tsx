@@ -204,7 +204,7 @@ const MainAdminPage = () => {
             </CardHeader>
             <CardContent className="px-4">
               <BarChart
-                className="h-[510px]"
+                className="h-[30rem]"
                 data={transactionsToChart}
                 index="month"
                 categories={["total"]}

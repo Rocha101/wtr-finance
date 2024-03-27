@@ -179,7 +179,7 @@ const TransactionsPage = () => {
           description="Lista de transações"
           backlink="/admin"
         />
-        <div className="h-full w-full p-3 mt-10">
+        <div className="h-full w-full p-3 mt-2">
           <SimpleTable
             columns={columns}
             rows={filteredTransactions}

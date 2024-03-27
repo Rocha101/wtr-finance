@@ -89,7 +89,7 @@ const CategoriesPage = () => {
           description="Lista de categorias"
           backlink="/admin"
         />
-        <div className="w-full p-3 items-end mt-10">
+        <div className="w-full p-3 items-end mt-2">
           <SimpleTable
             columns={columns}
             rows={categories}

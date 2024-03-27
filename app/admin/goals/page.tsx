@@ -160,7 +160,7 @@ const GoalsPage = () => {
           description="Lista de metas"
           backlink="/admin"
         />
-        <div className="h-full w-full mt-10 p-3">
+        <div className="h-full w-full mt-2 p-3">
           <SimpleTable
             columns={columns}
             rows={goals}

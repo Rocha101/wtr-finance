@@ -10,7 +10,7 @@ interface PageHeaderProps {
 
 const PageHeader = ({ title, description, backlink }: PageHeaderProps) => {
   return (
-    <div className="w-full items-center gap-4 flex px-3">
+    <div className="w-full items-center gap-4 flex p-6">
       {backlink && (
         <Link href={backlink} passHref>
           <Button variant="ghost" size="icon">

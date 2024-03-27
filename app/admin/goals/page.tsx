@@ -83,7 +83,16 @@ const GoalsPage = () => {
     {
       title: "Progresso",
       key: "progress",
-      render: (item: Goals) => `${item.progress}%`,
+      render: (item: Goals) => {
+        const transactionsSum = item.transactions.reduce(
+          (acc, transaction) => acc + transaction.amount,
+          0
+        );
+
+        const progress = (transactionsSum / item.targetAmount) * 100;
+
+        return `${progress.toFixed(2)}%`;
+      },
     },
     {
       title: "Ações",
@@ -100,7 +109,7 @@ const GoalsPage = () => {
   const handleDelete = async (id: string) => {
     setLoading(true);
     try {
-      await api.delete(`/goal/${id}`);
+      await api.delete(`/goals?id=${id}`);
       toast("Meta excluída com sucesso");
       fetchGoals();
     } catch (error) {
@@ -116,7 +125,7 @@ const GoalsPage = () => {
   const fetchGoals = async () => {
     setLoading(true);
     try {
-      const query = `/goal`;
+      const query = `/goals`;
       const response = await api.get(query);
       setGoals(response.data);
     } catch (error) {
@@ -130,7 +139,7 @@ const GoalsPage = () => {
     setLoading(true);
     const fetchGoals = async () => {
       try {
-        const query = `/goal`;
+        const query = `/goals`;
         const response = await api.get(query);
         console.log(response.data);
         setGoals(response.data);
@@ -151,7 +160,7 @@ const GoalsPage = () => {
           description="Lista de metas"
           backlink="/admin"
         />
-        <div className="h-full w-full mt-14 p-3">
+        <div className="h-full w-full mt-10 p-3">
           <SimpleTable
             columns={columns}
             rows={goals}

@@ -46,7 +46,7 @@ const NewGoal = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const res = await api.post("/goal", values);
+      const res = await api.post("/goals", values);
       console.log(res);
       form.reset({
         name: "",

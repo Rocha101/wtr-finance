@@ -4,21 +4,11 @@ import { RepeatInterval, Transaction, TransactionType } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { auth } from "@clerk/nextjs";
 
-const GetParamsSchema = z.object({
-  type: z.optional(z.string()),
-  startDate: z.optional(z.string()),
-  endDate: z.optional(z.string()),
-});
-
 const PostParamsSchema = z.object({
-  type: z.string().refine((type) => ["INCOME", "EXPENSE"].includes(type), {
-    message: "Invalid transaction type",
-  }),
-  amount: z.number(),
-  description: z.string(),
-  repeatInterval: z.optional(z.string()),
-  createdAt: z.optional(z.string()),
-  goalId: z.optional(z.string()),
+  name: z.string(),
+  targetAmount: z.number(),
+  progress: z.number(),
+  categories: z.array(z.string()),
 });
 
 const getParams = async (request: NextRequest) => {
@@ -27,11 +17,6 @@ const getParams = async (request: NextRequest) => {
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = await getParams(request);
-    const type = searchParams.get("type");
-    const startDate = searchParams.get("startDate");
-    const endDate = searchParams.get("endDate");
-
     const { userId } = auth();
 
     if (!userId)
@@ -40,26 +25,17 @@ export async function GET(request: NextRequest) {
         status: 400,
       });
 
-    const transactions = await prisma.transaction.findMany({
+    const goals = await prisma.goal.findMany({
       include: {
-        goals: true,
+        categories: true,
+        transactions: true,
       },
       where: {
         userId: userId,
-        ...(startDate &&
-          endDate && {
-            createdAt: {
-              gte: new Date(startDate),
-              lte: new Date(endDate),
-            },
-          }),
-        ...(type && {
-          type: type as Transaction["type"],
-        }),
       },
     });
 
-    return new Response(JSON.stringify(transactions), {
+    return new Response(JSON.stringify(goals), {
       headers: { "content-type": "application/json" },
       status: 200,
     });
@@ -76,8 +52,7 @@ export async function POST(request: NextRequest) {
   try {
     const response: any = PostParamsSchema.safeParse(await request.json());
 
-    const { type, amount, description, repeatInterval, createdAt, goalId } =
-      response.data;
+    const { name, targetAmount, progress, categories } = response.data;
 
     const { userId } = auth();
 
@@ -87,27 +62,21 @@ export async function POST(request: NextRequest) {
         status: 400,
       });
 
-    const newTransaction = await prisma.transaction.create({
+    const newGoal = await prisma.goal.create({
       data: {
-        type: type as TransactionType,
-        amount: amount,
-        description: description,
-        repeatInterval: repeatInterval as RepeatInterval,
+        name,
+        targetAmount,
+        progress,
+        categories: {
+          create: categories.map((category: string) => ({
+            name: category,
+          })),
+        },
         userId: userId,
-        ...(createdAt && {
-          createdAt: new Date(createdAt),
-        }),
-        ...(goalId && {
-          goals: {
-            connect: {
-              id: Number(goalId),
-            },
-          },
-        }),
       },
     });
 
-    return new Response(JSON.stringify(newTransaction), {
+    return new Response(JSON.stringify(newGoal), {
       headers: { "content-type": "application/json" },
       status: 200,
     });
@@ -124,38 +93,32 @@ export async function PATCH(request: NextRequest) {
     const searchParams = await getParams(request);
     const id = searchParams.get("id");
     const response: any = PostParamsSchema.safeParse(await request.json());
-    const { type, amount, description, repeatInterval, createdAt, goalId } =
-      response.data;
+    const { name, targetAmount, progress, categories } = response.data;
     const { userId } = auth();
     if (!userId)
       return new Response(JSON.stringify({ error: "Missing user id" }), {
         headers: { "content-type": "application/json" },
         status: 400,
       });
-    const updatedTransaction = await prisma.transaction.update({
+    const updatedGoal = await prisma.goal.update({
       where: {
         id: Number(id),
         userId: userId,
       },
       data: {
-        type: type as TransactionType,
-        amount,
-        description,
-        repeatInterval: repeatInterval as RepeatInterval,
-        ...(createdAt && {
-          createdAt: new Date(createdAt),
-        }),
-        ...(goalId && {
-          goals: {
-            connect: {
-              id: Number(goalId),
-            },
-          },
-        }),
+        name,
+        targetAmount,
+        progress,
+        categories: {
+          create: categories.map((category: string) => ({
+            name: category,
+          })),
+        },
+        userId: userId,
       },
     });
 
-    return new Response(JSON.stringify(updatedTransaction), {
+    return new Response(JSON.stringify(updatedGoal), {
       headers: { "content-type": "application/json" },
       status: 200,
     });
@@ -176,13 +139,13 @@ export async function DELETE(request: NextRequest) {
         headers: { "content-type": "application/json" },
         status: 400,
       });
-    const removedTransaction = await prisma.transaction.delete({
+    const removedGoal = await prisma.goal.delete({
       where: {
         id: Number(id),
       },
     });
 
-    return new Response(JSON.stringify(removedTransaction), {
+    return new Response(JSON.stringify(removedGoal), {
       headers: { "content-type": "application/json" },
       status: 200,
     });

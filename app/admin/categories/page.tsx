@@ -39,11 +39,12 @@ const CategoriesPage = () => {
   const handleDelete = async (id: string) => {
     setLoading(true);
     try {
-      await api.delete(`/categories/${id}`);
+      const res = await api.delete(`/categories?id=${id}`);
+      console.log(res);
       toast("Meta excluída com sucesso");
       fetchCategories();
     } catch (error) {
-      console.error(error);
+      console.log(error);
       toast("Erro ao excluir meta");
     } finally {
       setLoading(false);
@@ -88,16 +89,13 @@ const CategoriesPage = () => {
           description="Lista de categorias"
           backlink="/admin"
         />
-        <div className="h-full w-full flex flex-col gap-3 items-center justify-center mb-3 pt-3 mt-6">
-          <div className="w-full p-4 items-end">
-            <div className="mt-2">
-              <SimpleTable
-                columns={columns}
-                rows={categories}
-                loading={loading}
-              />
-            </div>
-          </div>
+        <div className="w-full p-3 items-end mt-10">
+          <SimpleTable
+            columns={columns}
+            rows={categories}
+            loading={loading}
+            rowsPerPage={13}
+          />
         </div>
       </div>
     </Suspense>

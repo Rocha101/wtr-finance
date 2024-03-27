@@ -116,14 +116,15 @@ const TransactionsPage = () => {
   const handleDelete = async (id: string) => {
     setLoading(true);
     try {
-      await api.delete(`/transaction/${id}`);
+      const res = await api.delete(`/transactions?id=${id}`);
+      console.log(res);
       toast("Transação excluída com sucesso");
       fetchTransactions({
         startDate: dateRange.from as Date,
         endDate: dateRange.to as Date,
       });
     } catch (error) {
-      console.error(error);
+      console.log(error);
       toast("Erro ao excluir transação");
     } finally {
       setLoading(false);
@@ -178,7 +179,7 @@ const TransactionsPage = () => {
           description="Lista de transações"
           backlink="/admin"
         />
-        <div className="h-full w-full mt-14 p-3">
+        <div className="h-full w-full p-3 mt-10">
           <SimpleTable
             columns={columns}
             rows={filteredTransactions}

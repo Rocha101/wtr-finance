@@ -165,7 +165,7 @@ const MainAdminPage = () => {
 
   return (
     <Suspense fallback={<Loading />}>
-      <div className=" h-full w-full">
+      <div className="h-full w-full">
         <PageHeader title="Painel" description="Informações gerais" />
         <div className="flex gap-2 items-center justify-end p-3">
           <CalendarDateRangePicker
@@ -204,7 +204,7 @@ const MainAdminPage = () => {
             </CardHeader>
             <CardContent className="px-4">
               <BarChart
-                className="h-[540px]"
+                className="h-[510px]"
                 data={transactionsToChart}
                 index="month"
                 categories={["total"]}

@@ -11,7 +11,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   return (
     <div className="h-screen ">
       <MainMenuComponent />
-      <div className="pt-3">{children}</div>
+      <div className="min-h-[calc(100vh_-_theme(spacing.16))]">{children}</div>
     </div>
   );
 };

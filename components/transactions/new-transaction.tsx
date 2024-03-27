@@ -75,7 +75,7 @@ const NewTransaction = () => {
   const fetchGoals = async () => {
     setLoading(true);
     try {
-      const query = `/goal`;
+      const query = `/goals`;
       const response = await api.get(query);
       setGoals(response.data);
     } catch (error) {

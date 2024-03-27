@@ -10,10 +10,14 @@ import {
 import { useRouter } from "next/navigation";
 import { ModeToggle } from "./mode-toggle";
 import { UserButton } from "@clerk/nextjs";
+import Link from "next/link";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { GrMenu } from "react-icons/gr";
+import { Button } from "./ui/button";
 
 type ItemsT = {
   label: string;
-  action?: () => void;
+  href: string;
   disabled?: boolean;
   children?: {
     label: string;
@@ -27,62 +31,78 @@ const MainMenuComponent = () => {
   const items: ItemsT = [
     {
       label: "Visão Geral",
-      action: () => router.push("/admin"),
+      href: "/admin",
     },
     {
       label: "Transações",
-      action: () => router.push("/admin/transactions"),
+      href: "/admin/transactions",
     },
     {
       label: "Metas",
-      action: () => router.push("/admin/goals"),
+      href: "/admin/goals",
     },
     {
       label: "Categorias",
-      action: () => router.push("/admin/categories"),
+      href: "/admin/categories",
     },
     {
       label: "Recorrentes",
-      action: () => router.push("/admin/recurrents"),
       disabled: true,
+      href: "/admin/recurrents",
     },
   ];
 
   return (
-    <Menubar className="rounded-none">
-      {items.map((item, index) => {
-        return (
-          <MenubarMenu key={index}>
-            {item.children ? (
-              <>
-                <MenubarTrigger disabled={item?.disabled}>
-                  {item.label}
-                </MenubarTrigger>
-                <MenubarContent>
-                  {item.children.map((child, index) => (
-                    <MenubarItem
-                      key={index}
-                      onClick={child.action}
-                      disabled={child?.disabled}
-                    >
-                      {child.label}
-                    </MenubarItem>
-                  ))}
-                </MenubarContent>
-              </>
-            ) : (
-              <MenubarTrigger onClick={item?.action} disabled={item?.disabled}>
+    <header className="w-full sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 justify-between">
+      <nav className="w-full hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+        {items.map((item, index) => {
+          return (
+            <Link key={index} href={item.disabled ? "#" : item.href} passHref>
+              <Button
+                variant="link"
+                disabled={item.disabled}
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
                 {item.label}
-              </MenubarTrigger>
-            )}
-          </MenubarMenu>
-        );
-      })}
-      <div className="flex items-center gap-3 absolute right-1">
+              </Button>
+            </Link>
+          );
+        })}
+      </nav>
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="icon" className="shrink-0 md:hidden">
+            <GrMenu className="h-5 w-5" />
+            <span className="sr-only">Menu</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left">
+          <nav className="grid gap-6 text-lg font-medium">
+            {items.map((item, index) => {
+              return (
+                <Link
+                  key={index}
+                  href={item.disabled ? "#" : item.href}
+                  passHref
+                >
+                  <Button
+                    variant="link"
+                    disabled={item.disabled}
+                    className="text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {item.label}
+                  </Button>
+                </Link>
+              );
+            })}
+          </nav>
+        </SheetContent>
+      </Sheet>
+      <div className="flex items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
         <ModeToggle />
         <UserButton afterSignOutUrl="/sign-in" />
       </div>
-    </Menubar>
+    </header>
   );
 };
 

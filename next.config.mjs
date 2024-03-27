@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: {
-    API_URL: `http${process.env.NEXT_PUBLIC_VERCEL_URL ? "s" : ""}://${
-      process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_VERCEL_URL
+    API_URL: `http${!process.env.NEXT_PUBLIC_SITE_URL ? "s" : ""}://${
+      typeof window !== "undefined" ? window.location.origin : ""
     }/api`,
   },
   redirects: async () => {

@@ -7,10 +7,9 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import Loading from "@/components/loading";
-import api from "@/app/src/utils/api";
+import api from "@/app/utils/api";
 import { toast } from "sonner";
 import NewGoal from "@/components/goals/new-goal";
-import { getUserId } from "@/app/src/utils/getUserId";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -117,8 +116,7 @@ const GoalsPage = () => {
   const fetchGoals = async () => {
     setLoading(true);
     try {
-      const userId = getUserId();
-      const query = `/goal/${userId}`;
+      const query = `/goal`;
       const response = await api.get(query);
       setGoals(response.data);
     } catch (error) {
@@ -132,8 +130,7 @@ const GoalsPage = () => {
     setLoading(true);
     const fetchGoals = async () => {
       try {
-        const userId = getUserId();
-        const query = `/goal/${userId}`;
+        const query = `/goal`;
         const response = await api.get(query);
         console.log(response.data);
         setGoals(response.data);

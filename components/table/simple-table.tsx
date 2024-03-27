@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { GrClose } from "react-icons/gr";
+import { GrClose, GrDown, GrLinkDown, GrLinkUp, GrUp } from "react-icons/gr";
 import { Column } from "./simple-table.d";
 import SimpleTableSkeleton from "./simple-table-skeleton";
 
@@ -39,6 +39,37 @@ interface SimpleTableProps {
   loading?: boolean;
 }
 
+const HeaderSortable = ({
+  column,
+  sort,
+  setSort,
+}: {
+  column: Column;
+  sort: "asc" | "desc";
+  setSort: (value: "asc" | "desc") => void;
+}) => {
+  return (
+    <Button
+      variant="link"
+      onClick={() => {
+        if (sort === "asc") {
+          setSort("desc");
+        } else {
+          setSort("asc");
+        }
+      }}
+      className="flex items-center p-0"
+    >
+      {column.title}
+      {sort === "desc" ? (
+        <GrLinkDown className="h-3 w-3 ml-2" />
+      ) : (
+        <GrLinkUp className="h-3 w-3 ml-2" />
+      )}
+    </Button>
+  );
+};
+
 const SimpleTable = ({
   columns,
   rows,
@@ -49,16 +80,10 @@ const SimpleTable = ({
   loading,
 }: SimpleTableProps) => {
   const [currentPage, setCurrentPage] = useState(0);
-  const [currentRows, setCurrentRows] = useState<any[]>(
-    rowsPerPage
-      ? rows.slice(
-          currentPage * rowsPerPage,
-          Math.min(currentPage * rowsPerPage + rowsPerPage, rows.length)
-        )
-      : rows
-  );
   const [searchValues, setSearchValues] = useState<any>({});
-
+  const [sortState, setSortState] = useState<{ [key: string]: "asc" | "desc" }>(
+    {}
+  );
   const totalPages = rowsPerPage ? Math.ceil(rows.length / rowsPerPage) : 1;
 
   const nextPage = () => {
@@ -108,15 +133,44 @@ const SimpleTable = ({
     return item[column.key];
   }
 
-  useEffect(() => {
-    const filteredRows: any[] = rows.filter((row) => {
-      return Object.keys(searchValues).every((key) => {
-        const value = searchValues[key].toLowerCase();
-        return value === "null" ? true : row[key].toLowerCase().includes(value);
-      });
+  const handleSorting = (columnKey: string) => {
+    setSortState((prevState) => ({
+      ...prevState,
+      [columnKey]: prevState[columnKey] === "asc" ? "desc" : "asc",
+    }));
+  };
+
+  const startIndex = currentPage * (rowsPerPage || 1);
+  const endIndex = Math.min(
+    startIndex + (rowsPerPage || rows.length),
+    rows.length
+  );
+  const sortedRows = [...rows].sort((a, b) => {
+    const columnKey = Object.keys(sortState).find((key) => sortState[key]);
+    if (!columnKey) return 0;
+
+    const sortOrder = sortState[columnKey];
+    const column = columns.find((col) => col.key === columnKey);
+    if (!column) return 0;
+
+    const aValue = a[column.key];
+    const bValue = b[column.key];
+
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      return sortOrder === "asc"
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    } else {
+      return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
+    }
+  });
+  const filteredRows: any[] = sortedRows.filter((row) => {
+    return Object.keys(searchValues).every((key) => {
+      const value = searchValues[key].toLowerCase();
+      return value === "null" ? true : row[key].toLowerCase().includes(value);
     });
-    setCurrentRows(filteredRows);
-  }, [searchValues, rows]);
+  });
+  const currentRows = filteredRows.slice(startIndex, endIndex);
 
   return (
     <div className="flex flex-col items-end border rounded-md bg-card">
@@ -211,8 +265,17 @@ const SimpleTable = ({
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={column.key} style={{ width: column.width }}>
-                  {column.title}
+                <TableHead key={column.key}>
+                  {column.sortable ? (
+                    <HeaderSortable
+                      key={column.key}
+                      column={column}
+                      sort={sortState[column.key] || "asc"}
+                      setSort={() => handleSorting(column.key)}
+                    />
+                  ) : (
+                    <span>{column.title}</span>
+                  )}
                 </TableHead>
               ))}
             </TableRow>

@@ -7,10 +7,10 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import Loading from "@/components/loading";
-import api from "@/app/utils/api";
+import api from "@/app/src/utils/api";
 import { toast } from "sonner";
 import NewGoal from "@/components/goals/new-goal";
-import { getUserId } from "@/app/utils/getUserId";
+import { getUserId } from "@/app/src/utils/getUserId";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,

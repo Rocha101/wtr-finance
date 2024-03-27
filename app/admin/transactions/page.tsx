@@ -11,8 +11,6 @@ import Loading from "@/components/loading";
 import api from "@/app/utils/api";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { getUserId } from "@/app/utils/getUserId";
-import { Budgets } from "../budgets/budget";
 import { Goals } from "../goals/goals";
 import { GrStorage, GrTarget } from "react-icons/gr";
 import { Column } from "@/components/table/simple-table.d";
@@ -26,7 +24,6 @@ type Transaction = {
   amount: number;
   type: string;
   goals: Goals[];
-  budgets: Budgets[];
 };
 
 const TransactionsPage = () => {
@@ -47,12 +44,15 @@ const TransactionsPage = () => {
     {
       title: "Nome",
       key: "description",
-      width: "70%",
+      width: "30%",
       search: true,
     },
     {
       title: "Total",
       key: "amount",
+      sortable: true,
+      width: "20%",
+      defaultSort: "desc",
     },
     {
       title: "Tipo",
@@ -71,15 +71,16 @@ const TransactionsPage = () => {
         { value: "INCOME", label: "Entrada" },
         { value: "EXPENSE", label: "Saída" },
       ],
+      width: "20%",
     },
     {
-      title: "Objetivo",
+      title: "Meta",
       key: "goals",
       render: (item: Transaction) => {
-        if (!item.goals[0] && !item.budgets[0]) {
+        if (!item.goals[0]) {
           return (
             <Badge variant="outline" className="mr-2">
-              Sem objetivo
+              Sem meta
             </Badge>
           );
         }
@@ -91,15 +92,10 @@ const TransactionsPage = () => {
                 {item.goals[0].name}
               </Badge>
             )}
-            {item.budgets[0] && (
-              <Badge variant="outline" className="mr-2">
-                <GrStorage className="mr-1" />
-                {item.budgets[0].name}
-              </Badge>
-            )}
           </>
         );
       },
+      width: "20%",
     },
     {
       title: "Ações",
@@ -109,7 +105,7 @@ const TransactionsPage = () => {
           Excluir
         </Button>
       ),
-      width: "5%",
+      width: "20%",
     },
   ];
 
@@ -122,7 +118,10 @@ const TransactionsPage = () => {
     try {
       await api.delete(`/transaction/${id}`);
       toast("Transação excluída com sucesso");
-      fetchTransactions();
+      fetchTransactions({
+        startDate: dateRange.from as Date,
+        endDate: dateRange.to as Date,
+      });
     } catch (error) {
       console.error(error);
       toast("Erro ao excluir transação");
@@ -144,12 +143,18 @@ const TransactionsPage = () => {
 
   const handleCloseModal = () => router.push("/admin/transactions");
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = async ({
+    startDate,
+    endDate,
+  }: {
+    startDate: Date;
+    endDate: Date;
+  }) => {
     setLoading(true);
     try {
-      const userId = getUserId();
-      const query = `/transaction/${userId}?startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}`;
+      const query = `/transactions?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`;
       const response = await api.get(query);
+      console.log(response.data);
       setTransactions(response.data);
     } catch (error) {
       toast("Erro ao buscar transações");
@@ -159,21 +164,10 @@ const TransactionsPage = () => {
   };
 
   useEffect(() => {
-    setLoading(true);
-    const fetchTransactions = async () => {
-      try {
-        const userId = getUserId();
-        const query = `/transaction/${userId}`;
-        const response = await api.get(query);
-        console.log(response.data);
-        setTransactions(response.data);
-      } catch (error) {
-        toast("Erro ao buscar transações");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTransactions();
+    fetchTransactions({
+      startDate: subDays(new Date(), 30),
+      endDate: new Date(),
+    });
   }, [modal]);
 
   return (
@@ -202,7 +196,12 @@ const TransactionsPage = () => {
                 <CalendarDateRangePicker
                   date={dateRange}
                   setDate={setDateRange as SelectRangeEventHandler}
-                  updateFn={fetchTransactions}
+                  updateFn={async () =>
+                    fetchTransactions({
+                      startDate: dateRange.from as Date,
+                      endDate: dateRange.to as Date,
+                    })
+                  }
                 />
               </Suspense>
             }

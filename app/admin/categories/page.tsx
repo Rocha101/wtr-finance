@@ -8,7 +8,6 @@ import { Suspense, useEffect, useState } from "react";
 import Loading from "@/components/loading";
 import api from "@/app/utils/api";
 import { toast } from "sonner";
-import { getUserId } from "@/app/utils/getUserId";
 
 type Category = {
   id: string;
@@ -54,7 +53,6 @@ const CategoriesPage = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const userId = getUserId();
       const query = `/categories`;
       const response = await api.get(query);
       setCategories(response.data);
@@ -69,7 +67,6 @@ const CategoriesPage = () => {
     setLoading(true);
     const fetchCategories = async () => {
       try {
-        const userId = getUserId();
         const query = `/categories`;
         const response = await api.get(query);
         console.log(response.data);

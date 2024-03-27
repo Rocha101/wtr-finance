@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  goals     Goal[] // Define the relation to Goal
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum RepeatInterval {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+model Transaction {
+  id             Int             @id @default(autoincrement())
+  type           TransactionType
+  amount         Float
+  description    String?
+  repeatInterval RepeatInterval?
+  userId         String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  goals          Goal[] // Define the relation to Goal
+
+  @@index([userId])
+}
+
+model Goal {
+  id           Int           @id @default(autoincrement())
+  name         String
+  targetAmount Float
+  progress     Float
+  userId       String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  transactions Transaction[] // Define the relation to Transaction
+  categories   Category[] // Define the relation to Category
+
+  @@index([userId])
+}

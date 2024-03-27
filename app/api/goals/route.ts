@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
   try {
     const response: any = PostParamsSchema.safeParse(await request.json());
 
-    const { name, targetAmount, progress, categories } = response.data;
+    const { name, targetAmount, categories } = response.data;
 
     const { userId } = auth();
 
@@ -66,7 +66,6 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         targetAmount,
-        progress,
         categories: {
           create: categories.map((category: string) => ({
             name: category,
@@ -93,7 +92,7 @@ export async function PATCH(request: NextRequest) {
     const searchParams = await getParams(request);
     const id = searchParams.get("id");
     const response: any = PostParamsSchema.safeParse(await request.json());
-    const { name, targetAmount, progress, categories } = response.data;
+    const { name, targetAmount, categories } = response.data;
     const { userId } = auth();
     if (!userId)
       return new Response(JSON.stringify({ error: "Missing user id" }), {
@@ -108,7 +107,6 @@ export async function PATCH(request: NextRequest) {
       data: {
         name,
         targetAmount,
-        progress,
         categories: {
           create: categories.map((category: string) => ({
             name: category,

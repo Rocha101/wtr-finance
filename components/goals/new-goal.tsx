@@ -24,9 +24,6 @@ const formSchema = z.object({
   targetAmount: z.number({
     required_error: "Total obrigatório",
   }),
-  progress: z.number({
-    required_error: "Progresso obrigatório",
-  }),
   categories: z.array(
     z.string({
       required_error: "Categoria obrigatória",
@@ -51,7 +48,6 @@ const NewGoal = () => {
       form.reset({
         name: "",
         targetAmount: 0,
-        progress: 0,
         categories: [],
       });
       router.push("/admin/goals");
@@ -98,29 +94,7 @@ const NewGoal = () => {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="progress"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel>
-                Progresso <b>{field.value}%</b>
-              </FormLabel>
 
-              <Input
-                {...field}
-                type="range"
-                min={0}
-                max={100}
-                value={field.value}
-                onChange={(e) => {
-                  field.onChange(parseFloat(e.target.value));
-                }}
-              />
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           control={form.control}
           name="categories"

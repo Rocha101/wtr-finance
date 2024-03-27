@@ -27,16 +27,6 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get("type");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
-    console.log(startDate, endDate);
-    // if (searchParams.size === 0) {
-    //   return new Response(JSON.stringify({ error: "Missing query params" }), {
-    //     headers: { "content-type": "application/json" },
-    //     status: 400,
-    //   });
-    // }
-    // const { type, startDate, endDate } = GetParamsSchema.parse(
-    //   Object.fromEntries(searchParams)
-    // );
 
     const { userId } = auth();
 
@@ -45,8 +35,6 @@ export async function GET(request: NextRequest) {
         headers: { "content-type": "application/json" },
         status: 400,
       });
-
-    console.log(userId);
 
     const transactions = await prisma.transaction.findMany({
       include: {

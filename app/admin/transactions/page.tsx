@@ -44,14 +44,15 @@ const TransactionsPage = () => {
     {
       title: "Nome",
       key: "description",
-      width: "40%",
+      width: "30%",
       search: true,
-      sortable: true,
     },
     {
       title: "Total",
       key: "amount",
       sortable: true,
+      width: "20%",
+      defaultSort: "desc",
     },
     {
       title: "Tipo",
@@ -70,15 +71,16 @@ const TransactionsPage = () => {
         { value: "INCOME", label: "Entrada" },
         { value: "EXPENSE", label: "Saída" },
       ],
+      width: "20%",
     },
     {
-      title: "Objetivo",
+      title: "Meta",
       key: "goals",
       render: (item: Transaction) => {
         if (!item.goals[0]) {
           return (
             <Badge variant="outline" className="mr-2">
-              Sem objetivo
+              Sem meta
             </Badge>
           );
         }
@@ -93,6 +95,7 @@ const TransactionsPage = () => {
           </>
         );
       },
+      width: "20%",
     },
     {
       title: "Ações",
@@ -102,7 +105,7 @@ const TransactionsPage = () => {
           Excluir
         </Button>
       ),
-      width: "5%",
+      width: "20%",
     },
   ];
 

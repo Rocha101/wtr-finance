@@ -41,8 +41,6 @@ import { DateRange, SelectRangeEventHandler } from "react-day-picker";
 import { subDays } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { RecurrentTransactions } from "./recurrents/recurrents";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import CountUp from "react-countup";
 
@@ -91,35 +89,14 @@ const MainAdminPage = () => {
       icon: <GrCreditCard />,
     },
   ];
-  const columnsRecurrentTransactions = [
-    {
-      title: "Descrição",
-      key: "description",
-      width: "70%",
-    },
-    {
-      title: "Total",
-      key: "amount",
-    },
-    {
-      title: "Tipo",
-      key: "type",
-      render: (item: RecurrentTransactions) => {
-        return (
-          <Badge variant={item.type === "INCOME" ? "success" : "destructive"}>
-            {item.type === "INCOME" ? "Entrada" : "Saída"}
-          </Badge>
-        );
-      },
-    },
-  ];
 
   const getIncomesTotal = async () => {
     setLoading(true);
     try {
-      const query = `/transaction/total/&startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}&type=INCOME`;
+      const query = `/transactions/total?startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}&type=INCOME`;
       const response = await api.get(query);
-      setWidgetValues((prev) => ({ ...prev, incomes: response.data }));
+      console.log(response.data.total);
+      setWidgetValues((prev) => ({ ...prev, incomes: response.data.total }));
     } catch (error: any) {
       toast(JSON.parse(error.request.response).error);
     }
@@ -128,9 +105,10 @@ const MainAdminPage = () => {
   const getExpensesTotal = async () => {
     setLoading(true);
     try {
-      const query = `/transaction/total/&startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}&type=EXPENSE`;
+      const query = `/transactions/total?startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}&type=EXPENSE`;
       const response = await api.get(query);
-      setWidgetValues((prev) => ({ ...prev, expenses: response.data }));
+      console.log(response.data.total);
+      setWidgetValues((prev) => ({ ...prev, expenses: response.data.total }));
     } catch (error: any) {
       toast(JSON.parse(error.request.response).error);
     } finally {
@@ -141,7 +119,7 @@ const MainAdminPage = () => {
   const getAllTransactionsToChart = async () => {
     setLoading(true);
     try {
-      const query = `/transaction/totalbymonth/&startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}`;
+      const query = `/transactions/totalByMonth?startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}`;
       const response = await api.get<
         {
           month: string;
@@ -164,7 +142,7 @@ const MainAdminPage = () => {
   const fetchRecentTransactions = async () => {
     setLoading(true);
     try {
-      const query = `/transaction/&startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}`;
+      const query = `/transactions?startDate=${dateRange.from?.toISOString()}&endDate=${dateRange.to?.toISOString()}`;
       const response = await api.get(query);
       const mostRecent = response.data.slice(0, 7);
       setTransactions(mostRecent);

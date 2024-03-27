@@ -80,7 +80,7 @@ const MainMenuComponent = () => {
       })}
       <div className="flex items-center gap-3 absolute right-1">
         <ModeToggle />
-        <UserButton />
+        <UserButton afterSignOutUrl="/sign-in" />
       </div>
     </Menubar>
   );

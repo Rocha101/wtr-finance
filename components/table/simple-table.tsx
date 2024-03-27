@@ -45,26 +45,24 @@ const HeaderSortable = ({
   setSort,
 }: {
   column: Column;
-  sort: string;
-  setSort: (value: string) => void;
+  sort: "asc" | "desc";
+  setSort: (value: "asc" | "desc") => void;
 }) => {
   return (
     <Button
       variant="link"
       onClick={() => {
-        if (sort === column.key) {
-          setSort(`-${column.key}`);
+        if (sort === "asc") {
+          setSort("desc");
         } else {
-          setSort(column.key);
+          setSort("asc");
         }
       }}
       className="flex items-center p-0"
     >
       {column.title}
-      {sort === column.key ? (
+      {sort === "desc" ? (
         <GrLinkDown className="h-3 w-3 ml-2" />
-      ) : sort === `-${column.key}` ? (
-        <GrLinkUp className="h-3 w-3 ml-2" />
       ) : (
         <GrLinkUp className="h-3 w-3 ml-2" />
       )}
@@ -82,22 +80,10 @@ const SimpleTable = ({
   loading,
 }: SimpleTableProps) => {
   const [currentPage, setCurrentPage] = useState(0);
-  const [currentRows, setCurrentRows] = useState<any[]>(
-    rowsPerPage
-      ? rows.slice(
-          currentPage * rowsPerPage,
-          Math.min(currentPage * rowsPerPage + rowsPerPage, rows.length)
-        )
-      : rows
-  );
   const [searchValues, setSearchValues] = useState<any>({});
-  const defaultColumnSort = columns.find((column) => column.defaultSort);
-  const [sort, setSort] = useState(
-    defaultColumnSort
-      ? { [defaultColumnSort.key]: defaultColumnSort.defaultSort }
-      : {}
+  const [sortState, setSortState] = useState<{ [key: string]: "asc" | "desc" }>(
+    {}
   );
-
   const totalPages = rowsPerPage ? Math.ceil(rows.length / rowsPerPage) : 1;
 
   const nextPage = () => {
@@ -147,27 +133,46 @@ const SimpleTable = ({
     return item[column.key];
   }
 
-  useEffect(() => {
-    const filteredRows: any[] = rows.filter((row) => {
-      return Object.keys(searchValues).every((key) => {
-        const value = searchValues[key].toLowerCase();
-        return value === "null" ? true : row[key].toLowerCase().includes(value);
-      });
+  const handleSorting = (columnKey: string) => {
+    setSortState((prevState) => ({
+      ...prevState,
+      [columnKey]: prevState[columnKey] === "asc" ? "desc" : "asc",
+    }));
+  };
+
+  const startIndex = currentPage * (rowsPerPage || 1);
+  const endIndex = Math.min(
+    startIndex + (rowsPerPage || rows.length),
+    rows.length
+  );
+  const sortedRows = [...rows].sort((a, b) => {
+    const columnKey = Object.keys(sortState).find((key) => sortState[key]);
+    if (!columnKey) return 0;
+
+    const sortOrder = sortState[columnKey];
+    const column = columns.find((col) => col.key === columnKey);
+    if (!column) return 0;
+
+    const aValue = a[column.key];
+    const bValue = b[column.key];
+
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      return sortOrder === "asc"
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    } else {
+      return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
+    }
+  });
+  const filteredRows: any[] = rows.filter((row) => {
+    return Object.keys(searchValues).every((key) => {
+      const value = searchValues[key].toLowerCase();
+      return value === "null" ? true : row[key].toLowerCase().includes(value);
     });
-    const sortedRows = filteredRows.sort((a, b) => {
-      if (sort) {
-        const key = Object.keys(sort)[0];
-        const value = sort[key];
-        if (value === key) {
-          return a[key] > b[key] ? 1 : -1;
-        } else {
-          return a[key] < b[key] ? 1 : -1;
-        }
-      }
-      return 0;
-    });
-    setCurrentRows(sortedRows);
-  }, [searchValues, rows, sort]);
+  });
+  const currentRows = filteredRows.slice(startIndex, endIndex);
+
+  console.log(sortState);
 
   return (
     <div className="flex flex-col items-end border rounded-md bg-card">
@@ -267,8 +272,8 @@ const SimpleTable = ({
                     <HeaderSortable
                       key={column.key}
                       column={column}
-                      sort={sort[column.key] as string}
-                      setSort={(value) => setSort({ [column.key]: value })}
+                      sort={sortState[column.key] || "asc"}
+                      setSort={() => handleSorting(column.key)}
                     />
                   ) : (
                     <span>{column.title}</span>

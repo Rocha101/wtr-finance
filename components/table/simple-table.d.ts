@@ -8,6 +8,7 @@ type Column = {
   type?: "select" | "text" | "number" | "date" | "time" | "datetime";
   options?: { label: string; value: string }[];
   sortable?: boolean;
+  defaultSort?: "asc" | "desc";
 };
 
 export { Column };

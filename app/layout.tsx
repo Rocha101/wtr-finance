@@ -4,7 +4,6 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ClerkProvider } from "@clerk/nextjs";
-import { dark } from "@clerk/themes";
 import { ptBR } from "@clerk/localizations";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -22,11 +21,13 @@ export default function RootLayout({
   return (
     <ClerkProvider
       appearance={{
-        baseTheme: dark,
+        variables: {
+          colorPrimary: "hsl(263.4, 70%, 50.4%)", // change this value (you can get it from you're css variables, make sure to include 'hsl' and commas)
+        },
       }}
       localization={ptBR}
     >
-      <html lang="en">
+      <html lang="en" className="antialiased">
         <body className={`${inter.className}`}>
           <ThemeProvider
             attribute="class"

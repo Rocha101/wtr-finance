@@ -20,15 +20,6 @@ import { toast } from "sonner";
 import api from "../utils/api";
 import Loading from "@/components/loading";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import {
   Table,
   TableBody,
   TableCell,
@@ -43,6 +34,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import CountUp from "react-countup";
+import { BarChart } from "@tremor/react";
 
 type Transaction = {
   id: number;
@@ -205,53 +197,25 @@ const MainAdminPage = () => {
             </Card>
           ))}
         </div>
-        <div className="grid grid-cols-4 p-3 gap-3">
-          <Card className="col-span-4 md:col-span-3">
+        <div className="grid grid-cols-12 p-3 gap-3">
+          <Card className="col-span-12 md:col-span-7 lg:col-span-8">
             <CardHeader>
               <CardTitle>Transações por mês</CardTitle>
             </CardHeader>
-            <CardContent className="pl-2">
-              <ResponsiveContainer width="100%" height={540}>
-                <BarChart data={transactionsToChart}>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    opacity={0.4}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
-                      border: "1px solid #f0f0f0",
-                      color: "#333",
-                    }}
-                    cursor={{ fill: "rgba(0, 0, 0, 0.1)" }}
-                  />
-                  <XAxis
-                    dataKey="month"
-                    stroke="#888888"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    stroke="#888888"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => `R$${value}`}
-                  />
-                  <Bar
-                    dataKey="total"
-                    name={"Total"}
-                    fill="currentColor"
-                    radius={[4, 4, 0, 0]}
-                    className="fill-primary"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+            <CardContent className="px-4">
+              <BarChart
+                className="h-[540px]"
+                data={transactionsToChart}
+                index="month"
+                categories={["total"]}
+                colors={["purple"]}
+                yAxisWidth={48}
+                noDataText="Sem dados"
+                showLegend={false}
+              />
             </CardContent>
           </Card>
-          <Card className="col-span-4 md:col-span-1">
+          <Card className="h-full col-span-12 md:col-span-5 lg:col-span-4">
             <CardHeader className="flex flex-row items-center">
               <div className="grid gap-2">
                 <CardTitle>Transações</CardTitle>

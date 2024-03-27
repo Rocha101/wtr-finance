@@ -21,9 +21,13 @@ const PostParamsSchema = z.object({
   goalId: z.optional(z.string()),
 });
 
+const getParams = async (request: NextRequest) => {
+  return request.nextUrl.searchParams;
+};
+
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
+    const searchParams = await getParams(request);
     const type = searchParams.get("type");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
@@ -117,8 +121,8 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const { id } = Object.fromEntries(searchParams.entries());
+    const searchParams = await getParams(request);
+    const id = searchParams.get("id");
     const response: any = PostParamsSchema.safeParse(await request.json());
     const { type, amount, description, repeatInterval, createdAt, goalId } =
       response.data;

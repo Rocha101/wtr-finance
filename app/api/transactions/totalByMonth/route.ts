@@ -4,9 +4,13 @@ import { RepeatInterval, Transaction, TransactionType } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { auth } from "@clerk/nextjs";
 
+const getParams = async (request: NextRequest) => {
+  return request.nextUrl.searchParams;
+};
+
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
+    const searchParams = await getParams(request);
     const type = searchParams.get("type");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");

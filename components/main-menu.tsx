@@ -26,7 +26,7 @@ const MainMenuComponent = () => {
   const router = useRouter();
   const items: ItemsT = [
     {
-      label: "Home",
+      label: "Visão Geral",
       action: () => router.push("/admin"),
     },
     {

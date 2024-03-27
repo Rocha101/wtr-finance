@@ -36,7 +36,6 @@ const NewGoal = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      progress: 0,
       categories: [],
     },
   });

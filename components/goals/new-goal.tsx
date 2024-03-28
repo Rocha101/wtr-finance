@@ -16,6 +16,7 @@ import * as z from "zod";
 import { useRouter } from "next/navigation";
 import api from "@/app/utils/api";
 import { InputTags } from "../tag-input";
+import FormSkeleton from "../form-skeleton";
 
 const formSchema = z.object({
   name: z.string({

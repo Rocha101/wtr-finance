@@ -82,10 +82,54 @@ export async function POST(request: NextRequest) {
     const { userId } = auth();
 
     if (!userId)
-      return new Response(JSON.stringify({ error: "Missing user id" }), {
+      return new Response(JSON.stringify({ error: "Faltando id do usuario" }), {
         headers: { "content-type": "application/json" },
         status: 400,
       });
+
+    if (goalId) {
+      const goal = await prisma.goal.findUnique({
+        where: {
+          id: Number(goalId),
+        },
+        include: {
+          transactions: true,
+        },
+      });
+
+      if (!goal) {
+        return new Response(JSON.stringify({ error: "Meta nao encontrada" }), {
+          headers: { "content-type": "application/json" },
+          status: 404,
+        });
+      }
+
+      // Calculate the total amount of transactions associated with the goal
+      const totalTransactionsAmount = goal.transactions.reduce(
+        (acc, transaction) => acc + transaction.amount,
+        0
+      );
+
+      // Check if the new transaction amount exceeds the goal target amount
+      if (amount > goal.targetAmount - totalTransactionsAmount) {
+        return new Response(
+          JSON.stringify({ error: "Total ultrapassa objetivo da meta" }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 400,
+          }
+        );
+      }
+      if (amount < totalTransactionsAmount) {
+        return new Response(
+          JSON.stringify({ error: "Total menor que o total de transações" }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 400,
+          }
+        );
+      }
+    }
 
     const newTransaction = await prisma.transaction.create({
       data: {
@@ -132,6 +176,51 @@ export async function PATCH(request: NextRequest) {
         headers: { "content-type": "application/json" },
         status: 400,
       });
+
+    if (goalId) {
+      const goal = await prisma.goal.findUnique({
+        where: {
+          id: Number(goalId),
+        },
+        include: {
+          transactions: true,
+        },
+      });
+
+      if (!goal) {
+        return new Response(JSON.stringify({ error: "Meta nao encontrada" }), {
+          headers: { "content-type": "application/json" },
+          status: 404,
+        });
+      }
+
+      // Calculate the total amount of transactions associated with the goal
+      const totalTransactionsAmount = goal.transactions.reduce(
+        (acc, transaction) => acc + transaction.amount,
+        0
+      );
+
+      // Check if the new transaction amount exceeds the goal target amount
+      if (amount > goal.targetAmount - totalTransactionsAmount) {
+        return new Response(
+          JSON.stringify({ error: "Total ultrapassa objetivo da meta" }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 400,
+          }
+        );
+      }
+      if (amount < totalTransactionsAmount) {
+        return new Response(
+          JSON.stringify({ error: "Total menor que o total de transações" }),
+          {
+            headers: { "content-type": "application/json" },
+            status: 400,
+          }
+        );
+      }
+    }
+
     const updatedTransaction = await prisma.transaction.update({
       where: {
         id: Number(id),

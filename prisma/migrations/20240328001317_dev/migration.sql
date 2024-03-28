@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Goal" ADD COLUMN     "completed" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "progress" DOUBLE PRECISION NOT NULL DEFAULT 0;

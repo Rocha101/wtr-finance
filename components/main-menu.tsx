@@ -50,17 +50,33 @@ const MainMenuComponent = () => {
       disabled: true,
       href: "/admin/recurrents",
     },
+    {
+      label: "Configurações",
+      href: "/admin/settings",
+      disabled: true,
+    },
   ];
 
   return (
     <header className="w-full sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 justify-between">
       <nav className="w-full hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         {items.map((item, index) => {
-          return (
-            <Link key={index} href={item.disabled ? "#" : item.href} passHref>
+          if (item.disabled) {
+            return (
               <Button
+                key={index}
                 variant="link"
                 disabled={item.disabled}
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {item.label}
+              </Button>
+            );
+          }
+          return (
+            <Link key={index} href={item.href} passHref>
+              <Button
+                variant="link"
                 className="text-muted-foreground transition-colors hover:text-foreground"
               >
                 {item.label}
@@ -79,15 +95,22 @@ const MainMenuComponent = () => {
         <SheetContent side="left">
           <nav className="grid gap-6 text-lg font-medium">
             {items.map((item, index) => {
-              return (
-                <Link
-                  key={index}
-                  href={item.disabled ? "#" : item.href}
-                  passHref
-                >
+              if (item.disabled) {
+                return (
                   <Button
+                    key={index}
                     variant="link"
                     disabled={item.disabled}
+                    className="text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {item.label}
+                  </Button>
+                );
+              }
+              return (
+                <Link key={index} href={item.href} passHref>
+                  <Button
+                    variant="link"
                     className="text-muted-foreground transition-colors hover:text-foreground"
                   >
                     {item.label}

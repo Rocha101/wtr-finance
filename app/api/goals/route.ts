@@ -15,8 +15,24 @@ const getParams = async (request: NextRequest) => {
   return request.nextUrl.searchParams;
 };
 
+const calculateGoalProgress = (
+  transactions: Transaction[],
+  targetAmount: number
+) => {
+  const totalAmount = transactions.reduce((total, transaction) => {
+    if (transaction.type === TransactionType.INCOME) {
+      return total + transaction.amount;
+    } else {
+      return total - transaction.amount;
+    }
+  }, 0);
+  return (totalAmount / targetAmount) * 100;
+};
+
 export async function GET(request: NextRequest) {
   try {
+    const searchParams = await getParams(request);
+    const completed = searchParams.get("completed");
     const { userId } = auth();
 
     if (!userId)
@@ -32,10 +48,44 @@ export async function GET(request: NextRequest) {
       },
       where: {
         userId: userId,
+        ...(completed && { completed: completed === "true" }),
       },
     });
 
-    return new Response(JSON.stringify(goals), {
+    // Calculate progress for each goal
+    const goalsWithProgress = goals.map((goal) => ({
+      ...goal,
+      progress: calculateGoalProgress(goal.transactions, goal.targetAmount),
+    }));
+
+    // Update goals to completed if progress is 100%
+    const updatedGoals = goalsWithProgress.map((goal) => {
+      if (goal.progress === 100) {
+        return prisma.goal.update({
+          where: {
+            id: goal.id,
+          },
+          data: {
+            completed: true,
+            progress: goal.progress,
+          },
+        });
+      } else {
+        return prisma.goal.update({
+          where: {
+            id: goal.id,
+          },
+          data: {
+            completed: false,
+            progress: goal.progress,
+          },
+        });
+      }
+    });
+
+    await Promise.all(updatedGoals);
+
+    return new Response(JSON.stringify(goalsWithProgress), {
       headers: { "content-type": "application/json" },
       status: 200,
     });

@@ -47,6 +47,8 @@ model Goal {
   name         String
   targetAmount Float
   userId       String
+  progress     Float         @default(0)
+  completed    Boolean       @default(false)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   transactions Transaction[] // Define the relation to Transaction

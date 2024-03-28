@@ -21,12 +21,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { GrAddCircle, GrSubtractCircle } from "react-icons/gr";
+import { GrAddCircle, GrRotateRight, GrSubtractCircle } from "react-icons/gr";
 import api from "@/app/utils/api";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Loading from "../loading";
 import { Goals } from "@/app/admin/goals/goals";
+import FormSkeleton from "../form-skeleton";
 
 const formSchema = z.object({
   description: z.string({
@@ -67,7 +68,8 @@ const NewTransaction = () => {
       });
       router.push("/admin/transactions");
     } catch (error: any) {
-      console.log(error.response);
+      console.log(error.response.data.error);
+      toast(error.response.data.error);
       console.error(error);
     }
   };
@@ -75,7 +77,7 @@ const NewTransaction = () => {
   const fetchGoals = async () => {
     setLoading(true);
     try {
-      const query = `/goals`;
+      const query = `/goals?completed=false`;
       const response = await api.get(query);
       setGoals(response.data);
     } catch (error) {
@@ -89,7 +91,7 @@ const NewTransaction = () => {
     fetchGoals();
   }, []);
 
-  if (loading) return <Loading />;
+  if (loading) return <FormSkeleton numberOfInputs={4} />;
 
   return (
     <Form {...form}>

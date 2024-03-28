@@ -53,6 +53,7 @@ const TransactionsPage = () => {
       sortable: true,
       width: "20%",
       defaultSort: "desc",
+      money: true,
     },
     {
       title: "Tipo",
@@ -209,7 +210,7 @@ const TransactionsPage = () => {
             loading={loading}
           />
         </div>
-        <Suspense fallback={<Loading />}>
+        <Suspense fallback={<Loading dialog />}>
           <Dialog open={modal === "new"} onOpenChange={handleCloseModal}>
             <DialogContent className="sm:max-w-[425px]">
               <NewTransaction />

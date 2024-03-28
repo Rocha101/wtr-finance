@@ -18,6 +18,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Goals } from "./goals";
+import { Progress } from "@/components/ui/progress";
 
 const GoalsPage = () => {
   const router = useRouter();
@@ -31,7 +32,7 @@ const GoalsPage = () => {
     {
       title: "Nome",
       key: "name",
-      width: "70%",
+      width: "50%",
       search: true,
     },
     {
@@ -79,20 +80,17 @@ const GoalsPage = () => {
     {
       title: "Total",
       key: "targetAmount",
+      money: true,
     },
     {
       title: "Progresso",
       key: "progress",
-      render: (item: Goals) => {
-        const transactionsSum = item.transactions.reduce(
-          (acc, transaction) => acc + transaction.amount,
-          0
-        );
-
-        const progress = (transactionsSum / item.targetAmount) * 100;
-
-        return `${progress.toFixed(2)}%`;
-      },
+      render: (item: Goals) => (
+        <div className="flex items-center">
+          <Progress value={item.progress} className="h-2 max-w-32" />
+          <span className="ml-2 text-xs">{`${item.progress.toFixed(2)}%`}</span>
+        </div>
+      ),
     },
     {
       title: "Ações",

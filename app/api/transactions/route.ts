@@ -200,19 +200,12 @@ export async function PATCH(request: NextRequest) {
         0
       );
 
+      const restValue = goal.targetAmount - totalTransactionsAmount;
+
       // Check if the new transaction amount exceeds the goal target amount
-      if (amount > goal.targetAmount - totalTransactionsAmount) {
+      if (amount > restValue) {
         return new Response(
           JSON.stringify({ error: "Total ultrapassa objetivo da meta" }),
-          {
-            headers: { "content-type": "application/json" },
-            status: 400,
-          }
-        );
-      }
-      if (amount < totalTransactionsAmount) {
-        return new Response(
-          JSON.stringify({ error: "Total menor que o total de transações" }),
           {
             headers: { "content-type": "application/json" },
             status: 400,

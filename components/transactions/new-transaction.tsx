@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import Loading from "../loading";
 import { Goals } from "@/app/admin/goals/goals";
 import FormSkeleton from "../form-skeleton";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const formSchema = z.object({
   description: z.string({
@@ -49,6 +50,7 @@ const NewTransaction = () => {
   });
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(false);
+  const watchType = form.watch("type");
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const newData = {
@@ -109,83 +111,87 @@ const NewTransaction = () => {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="amount"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel>Total</FormLabel>
-
-              <FormControl>
-                <Input
-                  type="number"
-                  {...field}
-                  value={field.value}
-                  onChange={(e) => {
-                    field.onChange(parseFloat(e.target.value));
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel>Tipo</FormLabel>
-
-              <Select onValueChange={field.onChange} value={field.value}>
+        <div className="flex gap-2">
+          <FormField
+            control={form.control}
+            name="amount"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Total</FormLabel>
                 <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
+                  <Input
+                    type="number"
+                    {...field}
+                    value={field.value}
+                    onChange={(e) => {
+                      field.onChange(parseFloat(e.target.value));
+                    }}
+                  />
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="EXPENSE">
-                    <span className="flex gap-2 items-center">
-                      <GrSubtractCircle />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo</FormLabel>
+                <FormControl>
+                  <ToggleGroup
+                    type="single"
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="w-full gap-0 border border-input rounded-md"
+                  >
+                    <ToggleGroupItem
+                      value="EXPENSE"
+                      className="w-20 hover:bg-destructive data-[state=on]:bg-destructive text-destructive-foreground hover:text-destructive-foreground rounded-e-none"
+                    >
                       Saída
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="INCOME">
-                    <span className="flex gap-2  items-center">
-                      <GrAddCircle />
+                    </ToggleGroupItem>
+                    <ToggleGroupItem
+                      value="INCOME"
+                      className="w-20 hover:bg-success data-[state=on]:bg-success text-success-foreground hover:text-success-foreground rounded-s-none"
+                    >
                       Entrada
-                    </span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="goalId"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel>Meta (opcional)</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
+                    </ToggleGroupItem>
+                  </ToggleGroup>
                 </FormControl>
-                <SelectContent>
-                  {goals.map((goal: Goals) => (
-                    <SelectItem key={goal.id} value={goal.id.toString()}>
-                      {goal.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        {watchType === "INCOME" ? (
+          <FormField
+            control={form.control}
+            name="goalId"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Meta (opcional)</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {goals.map((goal: Goals) => (
+                      <SelectItem key={goal.id} value={goal.id.toString()}>
+                        {goal.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : null}
+
         <div className="w-full flex justify-end mt-2">
           <Button className="" onClick={form.handleSubmit(onSubmit)}>
             Salvar

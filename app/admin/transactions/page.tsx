@@ -127,7 +127,6 @@ const TransactionsPage = () => {
     } catch (error) {
       console.log(error);
       toast("Erro ao excluir transação");
-    } finally {
       setLoading(false);
     }
   };

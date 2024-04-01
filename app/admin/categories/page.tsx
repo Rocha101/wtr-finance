@@ -23,6 +23,7 @@ const CategoriesPage = () => {
       title: "Nome",
       key: "name",
       width: "70%",
+      search: true,
     },
     {
       title: "Ações",
@@ -94,7 +95,8 @@ const CategoriesPage = () => {
             columns={columns}
             rows={categories}
             loading={loading}
-            rowsPerPage={13}
+            rowsPerPage={11}
+            searchable
           />
         </div>
       </div>

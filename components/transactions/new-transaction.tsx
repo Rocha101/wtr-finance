@@ -147,13 +147,13 @@ const NewTransaction = () => {
                   >
                     <ToggleGroupItem
                       value="EXPENSE"
-                      className="w-20 hover:bg-destructive data-[state=on]:bg-destructive text-destructive-foreground hover:text-destructive-foreground rounded-e-none"
+                      className="w-20  hover:bg-destructive hover:text-destructive-foreground data-[state=on]:bg-destructive data-[state=on]:text-destructive-foreground  rounded-e-none"
                     >
                       Saída
                     </ToggleGroupItem>
                     <ToggleGroupItem
                       value="INCOME"
-                      className="w-20 hover:bg-success data-[state=on]:bg-success text-success-foreground hover:text-success-foreground rounded-s-none"
+                      className="w-20  hover:bg-success hover:text-success-foreground data-[state=on]:bg-success data-[state=on]:text-success-foreground  rounded-s-none"
                     >
                       Entrada
                     </ToggleGroupItem>

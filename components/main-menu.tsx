@@ -93,7 +93,7 @@ const MainMenuComponent = () => {
           </Button>
         </SheetTrigger>
         <SheetContent side="left">
-          <nav className="grid gap-6 text-lg font-medium">
+          <nav className="flex flex-col gap-6 text-lg font-medium items-start">
             {items.map((item, index) => {
               if (item.disabled) {
                 return (

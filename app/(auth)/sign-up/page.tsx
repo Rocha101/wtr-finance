@@ -8,7 +8,7 @@ const SignUpPage = () => {
       {/* <Card className="w-96 flex flex-col gap-3 p-6">
         <RegisterForm />
       </Card> */}
-      <SignUp />
+      <SignUp afterSignUpUrl={"/admin"} />
     </div>
   );
 };

@@ -9,11 +9,13 @@ datasource db {
 }
 
 model Category {
-  id        Int      @id @default(autoincrement())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  goals     Goal[] // Define the relation to Goal
+  id            Int          @id @default(autoincrement())
+  name          String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  goals         Goal[] // Define the relation to Goal
+  Transaction   Transaction? @relation(fields: [transactionId], references: [id])
+  transactionId Int?
 }
 
 enum TransactionType {
@@ -38,6 +40,9 @@ model Transaction {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   goals          Goal[] // Define the relation to Goal
+  categories     Category[] // Define the relation to Category
+  Account        Account?        @relation(fields: [accountId], references: [id])
+  accountId      Int?
 
   @@index([userId])
 }
@@ -53,6 +58,33 @@ model Goal {
   updatedAt    DateTime      @updatedAt
   transactions Transaction[] // Define the relation to Transaction
   categories   Category[] // Define the relation to Category
+
+  @@index([userId])
+}
+
+enum PaymentMethodType {
+  CREDIT
+  DEBIT
+  CASH
+  PIX
+}
+
+model PaymentMethod {
+  id        Int               @id @default(autoincrement())
+  name      String
+  type      PaymentMethodType
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model Account {
+  id           Int           @id @default(autoincrement())
+  userId       String
+  name         String
+  balance      Float
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  transactions Transaction[]
 
   @@index([userId])
 }

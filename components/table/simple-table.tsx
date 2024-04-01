@@ -265,7 +265,7 @@ const SimpleTable = ({
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={column.key}>
+                <TableHead key={column.key} style={{ width: column.width }}>
                   {column.sortable ? (
                     <HeaderSortable
                       key={column.key}

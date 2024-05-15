@@ -90,7 +90,7 @@ const MainAdminPage = () => {
       console.log(response.data.total);
       setWidgetValues((prev) => ({ ...prev, incomes: response.data.total }));
     } catch (error: any) {
-      toast(JSON.parse(error.request.response).error);
+      toast(JSON.parse(error.request.response || "{}").error);
     }
   };
 
@@ -102,7 +102,7 @@ const MainAdminPage = () => {
       console.log(response.data.total);
       setWidgetValues((prev) => ({ ...prev, expenses: response.data.total }));
     } catch (error: any) {
-      toast(JSON.parse(error.request.response).error);
+      toast(JSON.parse(error.request.response || "{}").error);
     } finally {
       setLoading(false);
     }
@@ -120,12 +120,14 @@ const MainAdminPage = () => {
       >(query);
       setTransactionsToChart(response.data);
     } catch (error: any) {
-      if ("Token inválido" === JSON.parse(error.request.response).error) {
+      if (
+        "Token inválido" === JSON.parse(error.request.response || "{}").error
+      ) {
         toast("Sessão expirada, por favor, faça login novamente.");
         router.push("/sign-in");
         return;
       }
-      toast(JSON.parse(error.request.response).error);
+      toast(JSON.parse(error.request.response || "{}").error);
     } finally {
       setLoading(false);
     }

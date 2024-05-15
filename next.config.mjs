@@ -3,9 +3,8 @@ const nextConfig = {
   env: {
     API_URL: process.env.NEXT_PUBLIC_SITE_URL
       ? `http://${process.env.NEXT_PUBLIC_SITE_URL}/api`
-      : process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
-      ? `https://${process.env.MAIN_URL}/api`
-      : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api`,
+      : process.env.NEXT_PUBLIC_VERCEL_ENV === "production" &&
+        `https://wtr-finance.vercel.app/api`,
   },
   redirects: async () => {
     return [

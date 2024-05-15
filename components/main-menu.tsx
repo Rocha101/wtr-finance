@@ -45,7 +45,7 @@ const MainMenuComponent = () => {
       label: "Categorias",
       href: "/admin/categories",
     },
-    {
+    /*  {
       label: "Recorrentes",
       disabled: true,
       href: "/admin/recurrents",
@@ -54,7 +54,7 @@ const MainMenuComponent = () => {
       label: "Configurações",
       href: "/admin/settings",
       disabled: true,
-    },
+    }, */
   ];
 
   return (
@@ -95,18 +95,6 @@ const MainMenuComponent = () => {
         <SheetContent side="left">
           <nav className="flex flex-col gap-6 text-lg font-medium items-start">
             {items.map((item, index) => {
-              if (item.disabled) {
-                return (
-                  <Button
-                    key={index}
-                    variant="link"
-                    disabled={item.disabled}
-                    className="text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    {item.label}
-                  </Button>
-                );
-              }
               return (
                 <Link key={index} href={item.href} passHref>
                   <Button
